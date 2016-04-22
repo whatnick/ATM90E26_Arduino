@@ -24,6 +24,8 @@ void setup() {
 
 void loop() {
   /*Repeatedly fetch some values from the ATM90E26 */
+  Serial.print("Status:");
+  Serial.println(GetSysStatus());
   Serial.print("Voltage:");
   Serial.println(GetLineVoltage());
   Serial.print("Current:");
@@ -32,4 +34,5 @@ void loop() {
   Serial.println(GetActivePower());
   Serial.print("p.f.:");
   Serial.println(GetPowerFactor());
+  delay(1000);
 }
