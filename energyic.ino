@@ -15,10 +15,12 @@
  #include "energyic.h"
  
  unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val){
-	//SPI interface rate is 200 to 160k bps. It Will need to be slowed down for EnergyIC
+	
 
 	unsigned char* data=(unsigned char*)&val;
 	unsigned short output;
+  //SPI interface rate is 200 to 160k bps. It Will need to be slowed down for EnergyIC
+  SPISettings settings(2000000, MSBFIRST, SPI_MODE2); 
 	
 	//switch MSB and LSB of value
 	output=(val>>8)|(val<<8);
@@ -28,14 +30,37 @@
 	address|=RW<<7;
 	
 	//Transmit and receive data
-	digitalWrite (energy_CS,0);
+  SPI.beginTransaction(settings);
+	digitalWrite (energy_CS,LOW);
   delayMicroseconds(10);
 	SPI.transfer(address);
   /* Must wait 4 us for data to become valid */
   delayMicroseconds(4);
-	SPI.transfer(data,2);
-	digitalWrite(energy_CS,1);
+
+  //Read data
+  //Do for each byte in transfer
+  if(RW)
+  {
+    for (byte i=0; i<2; i++)
+    {
+      /* Transer the byte */
+      *data = SPI.transfer (0x00);
+      data++;
+    }
+  }
+  else
+  {
+    for (byte i=0; i<2; i++)
+    {
+      /* Transer the byte */
+      SPI.transfer(*data);             // write all the bytes
+      data++;
+    }
+  }
+  
+	digitalWrite(energy_CS,HIGH);
   delayMicroseconds(10);
+  SPI.endTransaction();
         
 	output=(val>>8)|(val<<8); //reverse MSB and LSB
 	return output;
@@ -96,9 +121,6 @@ void InitEnergyIC(){
 
   /* Enable SPI */  
   SPI.begin();
-  SPI.setBitOrder(MSBFIRST);
-  SPI.setDataMode(SPI_MODE1);   // clk idle low, sample falling edge
-  SPI.setClockDivider(SPI_CLOCK_DIV4);
          
 	CommEnergyIC(0,SoftReset,0x789A); //Perform soft reset
 	CommEnergyIC(0,FuncEn,0x0030); //Voltage sag irq=1, report on warnout pin=1, energy dir change irq=0

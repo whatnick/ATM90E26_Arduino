@@ -34,5 +34,5 @@ void loop() {
   Serial.println(GetActivePower());
   Serial.print("p.f.:");
   Serial.println(GetPowerFactor());
-  delay(1000);
+  delay(500);
 }
