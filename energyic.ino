@@ -20,7 +20,7 @@
 	unsigned char* data=(unsigned char*)&val;
 	unsigned short output;
   //SPI interface rate is 200 to 160k bps. It Will need to be slowed down for EnergyIC
-  SPISettings settings(2000000, MSBFIRST, SPI_MODE2); 
+  SPISettings settings(200000, MSBFIRST, SPI_MODE3); 
 	
 	//switch MSB and LSB of value
 	output=(val>>8)|(val<<8);
@@ -69,6 +69,10 @@
 double  GetLineVoltage(){
 	unsigned short voltage=CommEnergyIC(1,Urms,0xFFFF);
 	return (double)voltage/100;
+}
+
+unsigned short  GetMeterStatus(){
+  return CommEnergyIC(1,EnStatus,0xFFFF);
 }
 
 double GetLineCurrent(){

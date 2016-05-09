@@ -84,5 +84,6 @@ double GetImportEnergy();
 double GetExportEnergy();
 void InitEnergyIC();
 unsigned short GetSysStatus();
+unsigned short  GetMeterStatus();
 
 #endif
