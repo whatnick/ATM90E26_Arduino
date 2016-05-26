@@ -20,8 +20,9 @@
 	unsigned char* data=(unsigned char*)&val;
 	unsigned short output;
   //SPI interface rate is 200 to 160k bps. It Will need to be slowed down for EnergyIC
+  #if !defined(ENERGIA)
   SPISettings settings(200000, MSBFIRST, SPI_MODE3); 
-	
+  #endif	
 	//switch MSB and LSB of value
 	output=(val>>8)|(val<<8);
 	val=output;
@@ -30,9 +31,11 @@
 	address|=RW<<7;
 	
 	//Transmit and receive data
+  #if !defined(ENERGIA)
   SPI.beginTransaction(settings);
+  #endif      
 	digitalWrite (energy_CS,LOW);
-  delayMicroseconds(10);
+        delayMicroseconds(10);
 	SPI.transfer(address);
   /* Must wait 4 us for data to become valid */
   delayMicroseconds(4);
@@ -60,7 +63,9 @@
   
 	digitalWrite(energy_CS,HIGH);
   delayMicroseconds(10);
+  #if !defined(ENERGIA)
   SPI.endTransaction();
+  #endif
         
 	output=(val>>8)|(val<<8); //reverse MSB and LSB
 	return output;
@@ -122,9 +127,15 @@ void InitEnergyIC(){
 	pinMode(energy_IRQ,INPUT );
 	pinMode(energy_CS,OUTPUT );
 	pinMode(energy_WO,INPUT );
-
+ 
   /* Enable SPI */  
   SPI.begin();
+  #if defined(ENERGIA)
+    SPI.setBitOrder(MSBFIRST);
+    SPI.setDataMode(SPI_MODE3);
+    SPI.setClockDivider(SPI_CLOCK_DIV16);
+  #endif
+
          
 	CommEnergyIC(0,SoftReset,0x789A); //Perform soft reset
 	CommEnergyIC(0,FuncEn,0x0030); //Voltage sag irq=1, report on warnout pin=1, energy dir change irq=0
