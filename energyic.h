@@ -75,6 +75,8 @@ const int energy_CS = 10;
 const int energy_WO = 8;
 
 unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val);
+unsigned short CommSPI(unsigned char RW,unsigned char address, unsigned short val);
+unsigned short CommUART(unsigned char RW,unsigned char address, unsigned short val);
 double  GetLineVoltage();
 double GetLineCurrent();
 double GetActivePower();

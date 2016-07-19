@@ -10,30 +10,43 @@
 
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
- 
+ #ifndef ENERGYSERIAL
  #include <SPI.h>
+ #else
+ //#include <SoftwareSerial.h>
+ #endif
  #include "energyic.h"
  
  unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val){
 	
+  #ifdef ENERGYSERIAL
+    return CommUART(RW,address,val);
+  #else
+    return CommSPI(RW,address,val);
+  #endif
+	
+}
 
-	unsigned char* data=(unsigned char*)&val;
-	unsigned short output;
+#ifndef ENERGYSERIAL
+unsigned short CommSPI(unsigned char RW,unsigned char address, unsigned short val)
+{
+  unsigned char* data=(unsigned char*)&val;
+  unsigned short output;
   //SPI interface rate is 200 to 160k bps. It Will need to be slowed down for EnergyIC
   SPISettings settings(200000, MSBFIRST, SPI_MODE3); 
-	
-	//switch MSB and LSB of value
-	output=(val>>8)|(val<<8);
-	val=output;
-	
-	//Set read write flag
-	address|=RW<<7;
-	
-	//Transmit and receive data
+  
+  //switch MSB and LSB of value
+  output=(val>>8)|(val<<8);
+  val=output;
+  
+  //Set read write flag
+  address|=RW<<7;
+  
+  //Transmit and receive data
   SPI.beginTransaction(settings);
-	digitalWrite (energy_CS,LOW);
+  digitalWrite (energy_CS,LOW);
   delayMicroseconds(10);
-	SPI.transfer(address);
+  SPI.transfer(address);
   /* Must wait 4 us for data to become valid */
   delayMicroseconds(4);
 
@@ -58,12 +71,59 @@
     }
   }
   
-	digitalWrite(energy_CS,HIGH);
+  digitalWrite(energy_CS,HIGH);
   delayMicroseconds(10);
   SPI.endTransaction();
         
-	output=(val>>8)|(val<<8); //reverse MSB and LSB
-	return output;
+  output=(val>>8)|(val<<8); //reverse MSB and LSB
+  return output;
+}
+#endif
+
+unsigned short CommUART(unsigned char RW,unsigned char address, unsigned short val)
+{
+  unsigned char* data=(unsigned char*)&val;
+  unsigned short output;
+  
+  //switch MSB and LSB of value
+  //output=(val>>8)|(val<<8);
+  val=output;
+  //Set read write flag
+  address|=RW<<7;
+
+  byte chksum = address;
+  if(!RW)
+  {
+    unsigned short chksum_short = (val>>8) + (val&0xFF) + address;
+    chksum = chksum_short & 0xFF;
+  }
+
+  //begin UART command
+  ENERGYSERIAL.write(0xFE);
+  ENERGYSERIAL.write(address);
+  if(!RW)
+  {
+    for (byte i=0; i<2; i++)
+    {
+      /* Transer the byte */
+      ENERGYSERIAL.write(*data);             // write all the bytes
+      data++;
+    }
+  }
+  ENERGYSERIAL.write(chksum);
+  delay(5);
+  if(RW)
+  {
+    for (byte i=0; i<2; i++)
+    {
+      /* Transer the byte */
+      *data = ENERGYSERIAL.read();
+      data++;
+    }
+  }
+  byte ret_sum = ENERGYSERIAL.read();
+  Serial.println(ret_sum,HEX);
+  return output;
 }
 
 double  GetLineVoltage(){
@@ -123,9 +183,11 @@ void InitEnergyIC(){
 	pinMode(energy_CS,OUTPUT );
 	pinMode(energy_WO,INPUT );
 
+  #ifndef ENERGYSERIAL
   /* Enable SPI */  
   SPI.begin();
-         
+  #endif
+  
 	CommEnergyIC(0,SoftReset,0x789A); //Perform soft reset
 	CommEnergyIC(0,FuncEn,0x0030); //Voltage sag irq=1, report on warnout pin=1, energy dir change irq=0
 	CommEnergyIC(0,SagTh,0x1F2F); //Voltage sag threshhold

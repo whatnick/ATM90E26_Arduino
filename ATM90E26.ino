@@ -12,12 +12,26 @@
 */
 
 // the sensor communicates using SPI, so include the library:
-#include <SPI.h>
+
 #include "energyic.h"
+
+
+#define ENERGYSERIAL Serial1
+
+#ifdef ENERGYSERIAL
+//#include <SoftwareSerial.h>
+//SoftwareSerial swSer(14, 12, false, 256);
+#else
+#include <SPI.h>
+#endif
 
 void setup() {
   /* Initialize the serial port to host */
   Serial.begin(9600);
+  #ifdef ENERGYSERIAL
+  Serial1.begin(9600);
+  Serial.println("In UART Mode");
+  #endif
   /*Initialise the ATM90E26 + SPI port */
   InitEnergyIC();
 }
@@ -26,19 +40,19 @@ void loop() {
   /*Repeatedly fetch some values from the ATM90E26 */
   Serial.print("Sys Status:");
   Serial.println(GetSysStatus(),HEX);
-  delay(10);
+  delay(20);
   Serial.print("Meter Status:");
   Serial.println(GetMeterStatus(),HEX);
-  delay(10);
+  delay(20);
   Serial.print("Voltage:");
   Serial.println(GetLineVoltage());
-  delay(10);
+  delay(20);
   Serial.print("Current:");
   Serial.println(GetLineCurrent());
-  delay(10);
+  delay(20);
   Serial.print("Active power:");
   Serial.println(GetActivePower());
-  delay(10);
+  delay(20);
   Serial.print("p.f.:");
   Serial.println(GetPowerFactor());
   delay(1000);
