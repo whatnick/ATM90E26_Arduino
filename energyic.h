@@ -68,15 +68,7 @@
 #define PangleTwo 0x6E //Phase Angle between Voltage and N Line Current
 #define SmeanTwo 0x6F //N Line Mean Apparent Power
 
-// pins used for the connection with the sensor
-// the other you need are controlled by the SPI library):
-const int energy_IRQ = 2;
-const int energy_CS = 10;
-const int energy_WO = 8;
-
 unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val);
-unsigned short CommSPI(unsigned char RW,unsigned char address, unsigned short val);
-unsigned short CommUART(unsigned char RW,unsigned char address, unsigned short val);
 double  GetLineVoltage();
 double GetLineCurrent();
 double GetActivePower();
