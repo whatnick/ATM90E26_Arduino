@@ -11,11 +11,18 @@ void setup() {
   swSer.begin(9600);
   Serial.println("\nATM90E26 UART Test Started");
   InitEnergyIC();
+  delay(1000);
 }
 
 void loop() {
   /*Repeatedly fetch some values from the ATM90E26 */
   Serial.print("Sys Status:");
+  unsigned short s_status = GetSysStatus();
+  if(s_status == 0xFFFF)
+  {
+    //Read failed reset ESP, this is heavy
+    ESP.restart();
+  }
   Serial.println(GetSysStatus(),HEX);
   delay(10);
   Serial.print("Meter Status:");

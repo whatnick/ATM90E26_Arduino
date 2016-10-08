@@ -149,13 +149,13 @@ void InitEnergyIC(){
 
 	//Set measurement calibration values
 	CommEnergyIC(0,AdjStart,0x5678); //Measurement calibration startup command, registers 31-3A
-	CommEnergyIC(0,Ugain,0x9352);    //Voltage rms gain
-	CommEnergyIC(0,IgainL,0x2F6E);   //L line current gain
+	CommEnergyIC(0,Ugain,0xD8E9);    //Voltage rms gain
+	CommEnergyIC(0,IgainL,0x1BC9);   //L line current gain
 	CommEnergyIC(0,Uoffset,0x0000);  //Voltage offset
 	CommEnergyIC(0,IoffsetL,0x0000); //L line current offset
 	CommEnergyIC(0,PoffsetL,0x0000); //L line active power offset
 	CommEnergyIC(0,QoffsetL,0x0000); //L line reactive power offset
-  CommEnergyIC(0,CSTwo,0xC527); //Write CSTwo, as self calculated
+  CommEnergyIC(0,CSTwo,0xA64A); //Write CSTwo, as self calculated
   
   Serial.print("Checksum 2:");
 	Serial.println(CommEnergyIC(1,CSTwo,0x0000),HEX);    //Checksum 2. Needs to be calculated based off the above values.
