@@ -124,9 +124,9 @@ unsigned short GetSysStatus(){
 void InitEnergyIC(){
 	unsigned short systemstatus;
         
-	pinMode(energy_IRQ,INPUT );
+	//pinMode(energy_IRQ,INPUT );
 	pinMode(energy_CS,OUTPUT );
-	pinMode(energy_WO,INPUT );
+	//pinMode(energy_WO,INPUT );
  
   /* Enable SPI */  
   SPI.begin();

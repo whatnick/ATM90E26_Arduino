@@ -17,7 +17,7 @@
 
 void setup() {
   /* Initialize the serial port to host */
-  Serial.begin(9600);
+  Serial.begin(115200);
   /*Initialise the ATM90E26 + SPI port */
   InitEnergyIC();
 }
@@ -26,19 +26,19 @@ void loop() {
   /*Repeatedly fetch some values from the ATM90E26 */
   Serial.print("Sys Status:");
   Serial.println(GetSysStatus(),HEX);
-  delay(10);
+  yield();
   Serial.print("Meter Status:");
   Serial.println(GetMeterStatus(),HEX);
-  delay(10);
+  yield();
   Serial.print("Voltage:");
   Serial.println(GetLineVoltage());
-  delay(10);
+  yield();
   Serial.print("Current:");
   Serial.println(GetLineCurrent());
-  delay(10);
+  yield();
   Serial.print("Active power:");
   Serial.println(GetActivePower());
-  delay(10);
+  yield();
   Serial.print("p.f.:");
   Serial.println(GetPowerFactor());
   delay(1000);

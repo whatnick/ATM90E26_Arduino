@@ -70,9 +70,9 @@
 
 // pins used for the connection with the sensor
 // the other you need are controlled by the SPI library):
-const int energy_IRQ = 2;
+//const int energy_IRQ = 2;
 const int energy_CS = 10;
-const int energy_WO = 8;
+//const int energy_WO = 8;
 
 unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val);
 double  GetLineVoltage();
