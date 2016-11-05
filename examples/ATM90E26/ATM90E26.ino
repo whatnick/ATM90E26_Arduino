@@ -1,14 +1,7 @@
-
-#include <SoftwareSerial.h>
-#include "energyic.h"
-
-//GPIO12 = NodeMCU D6
-//GPIO14 = NodeMCU D5
-SoftwareSerial swSer(14, 12, false, 256); //RX, TX
+#include <energyic.h>
 
 void setup() {
   Serial.begin(115200);
-  swSer.begin(9600);
   Serial.println("\nATM90E26 UART Test Started");
   InitEnergyIC();
   delay(1000);
