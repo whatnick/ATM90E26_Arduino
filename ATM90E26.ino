@@ -13,6 +13,14 @@
 
 // the sensor communicates using SPI, so include the library:
 #include <SPI.h>
+
+/*******************
+ * WEMOS SPI Pins:
+ * SCLK - D5
+ * MISO - D6
+ * MOSI - D7
+ * SS   - D8
+ *******************/
 #include "energyic.h"
 
 void setup() {

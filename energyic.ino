@@ -20,9 +20,14 @@
 	unsigned char* data=(unsigned char*)&val;
 	unsigned short output;
   //SPI interface rate is 200 to 160k bps. It Will need to be slowed down for EnergyIC
-  #if !defined(ENERGIA)
+  #if !defined(ENERGIA) && !defined(ESP8266)
   SPISettings settings(200000, MSBFIRST, SPI_MODE3); 
-  #endif	
+  #endif
+
+  #if defined(ESP8266)
+  SPISettings settings(200000, MSBFIRST, SPI_MODE2);
+  #endif
+   
 	//switch MSB and LSB of value
 	output=(val>>8)|(val<<8);
 	val=output;
@@ -35,7 +40,7 @@
   SPI.beginTransaction(settings);
   #endif      
 	digitalWrite (energy_CS,LOW);
-        delayMicroseconds(10);
+  delayMicroseconds(10);
 	SPI.transfer(address);
   /* Must wait 4 us for data to become valid */
   delayMicroseconds(4);
