@@ -15,7 +15,6 @@
 #define __ATM90E26_H__
 
 #include <Arduino.h>
-#include <SoftwareSerial.h>
 
 #define SoftReset 0x00 //Software Reset
 #define SysStatus 0x01 //System Status

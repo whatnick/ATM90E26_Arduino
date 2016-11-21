@@ -13,8 +13,10 @@ void loop() {
   unsigned short s_status = GetSysStatus();
   if(s_status == 0xFFFF)
   {
+	#if defined(ESP8266)
     //Read failed reset ESP, this is heavy
     ESP.restart();
+	#endif
   }
   Serial.println(GetSysStatus(),HEX);
   delay(10);

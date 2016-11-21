@@ -12,9 +12,30 @@
 */
 #include <energyic.h>
 
+#if !defined(ARDUINO_ARCH_SAMD)
+#include <SoftwareSerial.h>
+#else
+
+#endif
+
+
+
+
+#if !defined(ARDUINO_ARCH_SAMD)
 //GPIO12 = NodeMCU D6
 //GPIO14 = NodeMCU D5
-SoftwareSerial swSer(14, 12, false, 256); //RX, TX
+SoftwareSerial ATMSerial(14, 12, false, 256); //RX, TX
+#else
+#include "wiring_private.h" // pinPeripheral() function
+//Feather M0 
+// PIN 11 = RX
+// PIN 10 = TX
+#define ATM_RX 11
+#define ATM_TX 10
+#define ATM_RX_PAD SERCOM_RX_PAD_0
+#define ATM_TX_PAD UART_TX_PAD_2
+Uart ATMSerial (&sercom1, ATM_RX, ATM_TX, SERCOM_RX_PAD_0, UART_TX_PAD_2);
+#endif
 
 unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val)
 {
@@ -30,25 +51,25 @@ unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned sho
   }
 
   //begin UART command
-  swSer.write(0xFE);
-  swSer.write(address);
+  ATMSerial.write(0xFE);
+  ATMSerial.write(address);
   
   if(!RW)
   {
       byte MSBWrite = val>>8;
       byte LSBWrite = val&0xFF;
-      swSer.write(MSBWrite);
-      swSer.write(LSBWrite);
+      ATMSerial.write(MSBWrite);
+      ATMSerial.write(LSBWrite);
   }
-  swSer.write(host_chksum);
+  ATMSerial.write(host_chksum);
   delay(10);
 
   //Read register only
   if(RW)
   {
-    byte MSByte = swSer.read();
-    byte LSByte = swSer.read();
-    byte atm90_chksum = swSer.read();
+    byte MSByte = ATMSerial.read();
+    byte LSByte = ATMSerial.read();
+    byte atm90_chksum = ATMSerial.read();
   
     if(atm90_chksum == ((LSByte + MSByte) & 0xFF))
     {
@@ -63,7 +84,7 @@ unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned sho
   //Write register only
   else
   {
-    byte atm90_chksum = swSer.read();
+    byte atm90_chksum = ATMSerial.read();
     if(atm90_chksum != host_chksum)
     {
       Serial.println("Write failed");
@@ -127,7 +148,13 @@ unsigned short GetSysStatus(){
 void InitEnergyIC(){
 	unsigned short systemstatus;
 	
-	swSer.begin(9600);
+	#if defined(ARDUINO_ARCH_SAMD)
+	// Assign pins 10 & 11 SERCOM functionality
+	pinPeripheral(10, PIO_SERCOM);
+	pinPeripheral(11, PIO_SERCOM);
+	#endif
+	
+	ATMSerial.begin(9600);
          
 	CommEnergyIC(0,SoftReset,0x789A); //Perform soft reset
 	CommEnergyIC(0,FuncEn,0x0030); //Voltage sag irq=1, report on warnout pin=1, energy dir change irq=0
@@ -145,7 +172,7 @@ void InitEnergyIC(){
 	CommEnergyIC(0,QStartTh,0x0AEC); //Reactive Startup Power Threshold
 	CommEnergyIC(0,QNolTh,0x0000); //Reactive No-Load Power Threshold
 	CommEnergyIC(0,MMode,0x9422); //Metering Mode Configuration. All defaults. See pg 31 of datasheet.
-  CommEnergyIC(0,CSOne,0x4A34); //Write CSOne, as self calculated
+	CommEnergyIC(0,CSOne,0x4A34); //Write CSOne, as self calculated
 	
 	Serial.print("Checksum 1:");
 	Serial.println(CommEnergyIC(1,CSOne,0x0000),HEX); //Checksum 1. Needs to be calculated based off the above values.
@@ -159,23 +186,23 @@ void InitEnergyIC(){
 	CommEnergyIC(0,IoffsetL,0x0000); //L line current offset
 	CommEnergyIC(0,PoffsetL,0x0000); //L line active power offset
 	CommEnergyIC(0,QoffsetL,0x0000); //L line reactive power offset
-  CommEnergyIC(0,CSTwo,0xD294); //Write CSTwo, as self calculated
+	CommEnergyIC(0,CSTwo,0xD294); //Write CSTwo, as self calculated
   
-  Serial.print("Checksum 2:");
+	Serial.print("Checksum 2:");
 	Serial.println(CommEnergyIC(1,CSTwo,0x0000),HEX);    //Checksum 2. Needs to be calculated based off the above values.
 	
 	CommEnergyIC(0,CalStart,0x8765); //Checks correctness of 21-2B registers and starts normal metering if ok
 	CommEnergyIC(0,AdjStart,0x8765); //Checks correctness of 31-3A registers and starts normal measurement  if ok
 
-  systemstatus = GetSysStatus();
+	systemstatus = GetSysStatus();
   
 	if (systemstatus&0xC000){
 		//checksum 1 error
-    Serial.println("Checksum 1 Error!!");
+		Serial.println("Checksum 1 Error!!");
 	}
 	if (systemstatus&0x3000){
 		//checksum 2 error
-    Serial.println("Checksum 2 Error!!");
+		Serial.println("Checksum 2 Error!!");
 	}
 }
 
