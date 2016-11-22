@@ -71,7 +71,17 @@
 // pins used for the connection with the sensor
 // the other you need are controlled by the SPI library):
 //const int energy_IRQ = 2;
+#ifdef  ARDUINO_ESP8266_WEMOS_D1MINI  // WeMos mini and D1 R2
 const int energy_CS = D8; // WEMOS SS pin
+#endif
+
+#ifdef ARDUINO_ARCH_SAMD //M0 board
+const int energy_CS = 13; // M0 SS pin
+#endif 
+
+#ifdef __AVR_ATmega32U4__ //32u4 board
+const int energy_CS = 13; // 32u4 SS pin
+#endif 
 //const int energy_WO = 8;
 
 unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val);
