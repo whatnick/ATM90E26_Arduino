@@ -75,12 +75,16 @@
 const int energy_CS = D8; // WEMOS SS pin
 #endif
 
+#ifdef  ARDUINO_ESP8266_ESP12  // Adafruit Huzzah
+const int energy_CS = 15; // HUZZAH SS pin
+#endif
+
 #ifdef ARDUINO_ARCH_SAMD //M0 board
-const int energy_CS = 13; // M0 SS pin
+const int energy_CS = 10; // M0 SS pin
 #endif 
 
 #ifdef __AVR_ATmega32U4__ //32u4 board
-const int energy_CS = 13; // 32u4 SS pin
+const int energy_CS = 10; // 32u4 SS pin
 #endif 
 //const int energy_WO = 8;
 
