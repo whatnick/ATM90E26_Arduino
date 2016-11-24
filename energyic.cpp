@@ -18,23 +18,27 @@
 
 #endif
 
+#if defined(ESP8266)
+//NOTE: Version 1.0 and 1.1 of featherwing use pins 14,12
+//version 1.2 and above using pins 13,14
+//SoftwareSerial ATMSerial(14, 12, false, 256); //RX, TX v1.0-1.1
+SoftwareSerial ATMSerial(13, 14, false, 256); //RX, TX v1.2+
+#endif 
 
+#ifdef __AVR_ATmega32U4__ //32u4 board
+SoftwareSerial ATMSerial(11, 13); //RX, TX
+#endif 
 
-
-#if !defined(ARDUINO_ARCH_SAMD)
-//GPIO12 = NodeMCU D6
-//GPIO14 = NodeMCU D5
-SoftwareSerial ATMSerial(14, 12, false, 256); //RX, TX
-#else
+#if defined(ARDUINO_ARCH_SAMD)
 #include "wiring_private.h" // pinPeripheral() function
 //Feather M0 
-// PIN 11 = RX
-// PIN 10 = TX
-#define ATM_RX 11
-#define ATM_TX 10
-#define ATM_RX_PAD SERCOM_RX_PAD_0
-#define ATM_TX_PAD UART_TX_PAD_2
-Uart ATMSerial (&sercom1, ATM_RX, ATM_TX, SERCOM_RX_PAD_0, UART_TX_PAD_2);
+#define PIN_SerialATM_RX       12ul
+#define PIN_SerialATM_TX       11ul
+#define PAD_SerialATM_RX       (SERCOM_RX_PAD_3)
+#define PAD_SerialATM_TX       (UART_TX_PAD_0)
+
+// Using SERCOM1 on M0 to communicate with ATM90E26
+Uart ATMSerial(&sercom1, PIN_SerialATM_RX, PIN_SerialATM_TX, PAD_SerialATM_RX, PAD_SerialATM_TX);
 #endif
 
 unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val)
@@ -148,14 +152,13 @@ unsigned short GetSysStatus(){
 void InitEnergyIC(){
 	unsigned short systemstatus;
 	
+	ATMSerial.begin(9600);
+	
 	#if defined(ARDUINO_ARCH_SAMD)
-	// Assign pins 10 & 11 SERCOM functionality
-	pinPeripheral(10, PIO_SERCOM);
-	pinPeripheral(11, PIO_SERCOM);
+	pinPeripheral(PIN_SerialATM_RX, PIO_SERCOM);
+	pinPeripheral(PIN_SerialATM_TX, PIO_SERCOM);
 	#endif
 	
-	ATMSerial.begin(9600);
-         
 	CommEnergyIC(0,SoftReset,0x789A); //Perform soft reset
 	CommEnergyIC(0,FuncEn,0x0030); //Voltage sag irq=1, report on warnout pin=1, energy dir change irq=0
 	CommEnergyIC(0,SagTh,0x1F2F); //Voltage sag threshhold
