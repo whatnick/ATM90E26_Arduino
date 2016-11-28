@@ -21,8 +21,8 @@
 #if defined(ESP8266)
 //NOTE: Version 1.0 and 1.1 of featherwing use pins 14,12
 //version 1.2 and above using pins 13,14
-//SoftwareSerial ATMSerial(14, 12, false, 256); //RX, TX v1.0-1.1
-SoftwareSerial ATMSerial(13, 14, false, 256); //RX, TX v1.2+
+SoftwareSerial ATMSerial(14, 12, false, 256); //RX, TX v1.0-1.1
+//SoftwareSerial ATMSerial(13, 14, false, 256); //RX, TX v1.2+
 #endif 
 
 #ifdef __AVR_ATmega32U4__ //32u4 board
