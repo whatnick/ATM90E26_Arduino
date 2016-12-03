@@ -43,7 +43,9 @@
 	//Transmit and receive data
   #if !defined(ENERGIA)
   SPI.beginTransaction(settings);
-  #endif      
+  #endif
+  //Disable LoRa chip on M0-LoRa
+  digitalWrite (8,HIGH);     
 	digitalWrite (energy_CS,LOW);
   delayMicroseconds(10);
 	SPI.transfer(address);
@@ -72,6 +74,8 @@
   }
   
 	digitalWrite(energy_CS,HIGH);
+  //Reenable LoRa chip on M0-LoRa
+  digitalWrite(8,LOW);
   delayMicroseconds(10);
   #if !defined(ENERGIA)
   SPI.endTransaction();
