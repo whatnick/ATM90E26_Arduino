@@ -1,3 +1,6 @@
+// This #include statement was automatically added by the Particle IDE.
+#include "energyic.h"
+
 /* ATM90E26 Energy Monitor Demo Application
 
     The MIT License (MIT)
@@ -12,7 +15,7 @@
 */
 
 // the sensor communicates using SPI, so include the library:
-#include <SPI.h>
+#include <application.h>
 
 /*******************
  * WEMOS SPI Pins:
@@ -21,6 +24,15 @@
  * MOSI - D7
  * SS   - D8
  *******************/
+ 
+ /*********************
+ //https://docs.particle.io/reference/firmware/electron/#spi
+* Particle Electron SPI pins
+*    SS => A2 (default)
+*    SCK => A3
+*    MISO => A4
+*    MOSI => A5
+*********************/
 #include "energyic.h"
 
 void setup() {
@@ -34,19 +46,19 @@ void loop() {
   /*Repeatedly fetch some values from the ATM90E26 */
   Serial.print("Sys Status:");
   Serial.println(GetSysStatus(),HEX);
-  yield();
+
   Serial.print("Meter Status:");
   Serial.println(GetMeterStatus(),HEX);
-  yield();
+
   Serial.print("Voltage:");
   Serial.println(GetLineVoltage());
-  yield();
+
   Serial.print("Current:");
   Serial.println(GetLineCurrent());
-  yield();
+
   Serial.print("Active power:");
   Serial.println(GetActivePower());
-  yield();
+
   Serial.print("p.f.:");
   Serial.println(GetPowerFactor());
   delay(100);

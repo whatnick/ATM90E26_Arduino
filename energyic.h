@@ -81,11 +81,16 @@ const int energy_CS = 15; // HUZZAH SS pin
 
 #ifdef ARDUINO_ARCH_SAMD //M0 board
 const int energy_CS = 10; // M0 SS pin
-#endif 
+#endif
 
 #ifdef __AVR_ATmega32U4__ //32u4 board
 const int energy_CS = 10; // 32u4 SS pin
-#endif 
+#endif
+
+
+#ifdef SPARK //Spark Electron or Photon board
+const int energy_CS = SS; // A2 is the SS pin
+#endif
 //const int energy_WO = 8;
 
 unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val);

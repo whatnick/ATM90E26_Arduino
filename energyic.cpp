@@ -10,20 +10,20 @@
 
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
- 
- #include <SPI.h>
+
+ #include <application.h>
  #include "energyic.h"
- 
+
  unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val){
-	
+
 
 	unsigned char* data=(unsigned char*)&val;
 	unsigned short output;
   //SPI interface rate is 200 to 160k bps. It Will need to be slowed down for EnergyIC
-  #if !defined(ENERGIA) && !defined(ESP8266) && !defined(ARDUINO_ARCH_SAMD)
+  #if !defined(ENERGIA) && !defined(ESP8266) && !defined(ARDUINO_ARCH_SAMD) && !defined(SPARK)
   SPISettings settings(200000, MSBFIRST, SPI_MODE3);
   #endif
-   
+
 
   #if defined(ESP8266)
   SPISettings settings(200000, MSBFIRST, SPI_MODE2);
@@ -32,20 +32,20 @@
   #if defined(ARDUINO_ARCH_SAMD)
   SPISettings settings(200000, MSBFIRST, SPI_MODE3);
   #endif
-   
+
 	//switch MSB and LSB of value
 	output=(val>>8)|(val<<8);
 	val=output;
-	
+
 	//Set read write flag
 	address|=RW<<7;
-	
+
 	//Transmit and receive data
-  #if !defined(ENERGIA)
+  #if !defined(ENERGIA) && !defined(SPARK)
   SPI.beginTransaction(settings);
   #endif
   //Disable LoRa chip on M0-LoRa
-  digitalWrite (8,HIGH);     
+  digitalWrite (8,HIGH);
 	digitalWrite (energy_CS,LOW);
   delayMicroseconds(10);
 	SPI.transfer(address);
@@ -72,15 +72,15 @@
       data++;
     }
   }
-  
+
 	digitalWrite(energy_CS,HIGH);
   //Reenable LoRa chip on M0-LoRa
   digitalWrite(8,LOW);
   delayMicroseconds(10);
-  #if !defined(ENERGIA)
+  #if !defined(ENERGIA) && !defined(SPARK)
   SPI.endTransaction();
   #endif
-        
+
 	output=(val>>8)|(val<<8); //reverse MSB and LSB
 	return output;
 }
@@ -137,24 +137,30 @@ unsigned short GetSysStatus(){
 
 void InitEnergyIC(){
 	unsigned short systemstatus;
-        
+
 	//pinMode(energy_IRQ,INPUT );
 	pinMode(energy_CS,OUTPUT );
 	//pinMode(energy_WO,INPUT );
- 
-  /* Enable SPI */  
+
+  /* Enable SPI */
   SPI.begin();
-  #if defined(ENERGIA)
+  #if defined(ENERGIA) 
     SPI.setBitOrder(MSBFIRST);
     SPI.setDataMode(SPI_MODE3);
     SPI.setClockDivider(SPI_CLOCK_DIV16);
   #endif
+  
+  #if defined(SPARK)
+    SPI.setBitOrder(MSBFIRST);
+    SPI.setDataMode(SPI_MODE3);
+    SPI.setClockSpeed(160, KHZ);
+  #endif
 
-         
+
 	CommEnergyIC(0,SoftReset,0x789A); //Perform soft reset
 	CommEnergyIC(0,FuncEn,0x0030); //Voltage sag irq=1, report on warnout pin=1, energy dir change irq=0
 	CommEnergyIC(0,SagTh,0x1F2F); //Voltage sag threshhold
-		
+
 
 	//Set metering calibration values
 	CommEnergyIC(0,CalStart,0x5678); //Metering calibration startup command. Register 21 to 2B need to be set
@@ -179,10 +185,10 @@ void InitEnergyIC(){
 	CommEnergyIC(0,PoffsetL,0x0000); //L line active power offset
 	CommEnergyIC(0,QoffsetL,0x0000); //L line reactive power offset
 	CommEnergyIC(1,CSTwo,0x0000);    //Checksum 2. Needs to be calculated based off the above values.
-	
+
 	//CommEnergyIC(0,CalStart,0x8765); //Checks correctness of 21-2B registers and starts normal metering if ok
 	//CommEnergyIC(0,AdjStart,0x8765); //Checks correctness of 31-3A registers and starts normal measurement  if ok
-	
+
 	if (systemstatus&0xC000){
 		//checksum 1 error
 	}
@@ -191,11 +197,3 @@ void InitEnergyIC(){
 	}
 
 }
-
-
-
-
-
-
-
-
