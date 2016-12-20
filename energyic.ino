@@ -157,39 +157,48 @@ void InitEnergyIC(){
 		
 
 	//Set metering calibration values
-	CommEnergyIC(0,CalStart,0x5678); //Metering calibration startup command. Register 21 to 2B need to be set
-	CommEnergyIC(0,PLconstH,0x00B9); //PL Constant MSB
-	CommEnergyIC(0,PLconstL,0xC1F3); //PL Constant LSB
-	CommEnergyIC(0,Lgain,0x1D39); 	//Line calibration gain
-	CommEnergyIC(0,Lphi,0x0000); //Line calibration angle
-	CommEnergyIC(0,PStartTh,0x08BD); //Active Startup Power Threshold
-	CommEnergyIC(0,PNolTh,0x0000); //Active No-Load Power Threshold
-	CommEnergyIC(0,QStartTh,0x0AEC); //Reactive Startup Power Threshold
-	CommEnergyIC(0,QNolTh,0x0000); //Reactive No-Load Power Threshold
-	CommEnergyIC(0,MMode,0x9422); //Metering Mode Configuration. All defaults. See pg 31 of datasheet.
-	CommEnergyIC(1,CSOne,0x0000); //Checksum 1. Needs to be calculated based off the above values.
+  CommEnergyIC(0,CalStart,0x5678); //Metering calibration startup command. Register 21 to 2B need to be set
+  CommEnergyIC(0,PLconstH,0x00B9); //PL Constant MSB
+  CommEnergyIC(0,PLconstL,0xC1F3); //PL Constant LSB
+  CommEnergyIC(0,Lgain,0x1D39);   //Line calibration gain
+  CommEnergyIC(0,Lphi,0x0000); //Line calibration angle
+  CommEnergyIC(0,PStartTh,0x08BD); //Active Startup Power Threshold
+  CommEnergyIC(0,PNolTh,0x0000); //Active No-Load Power Threshold
+  CommEnergyIC(0,QStartTh,0x0AEC); //Reactive Startup Power Threshold
+  CommEnergyIC(0,QNolTh,0x0000); //Reactive No-Load Power Threshold
+  CommEnergyIC(0,MMode,0x9422); //Metering Mode Configuration. All defaults. See pg 31 of datasheet.
+  CommEnergyIC(0,CSOne,0x4A34); //Write CSOne, as self calculated
+  
+  Serial.print("Checksum 1:");
+  Serial.println(CommEnergyIC(1,CSOne,0x0000),HEX); //Checksum 1. Needs to be calculated based off the above values.
 
 
-	//Set measurement calibration values
-	CommEnergyIC(0,AdjStart,0x5678); //Measurement calibration startup command
-	CommEnergyIC(0,Ugain,0x7A8E);    //Voltage rms gain
-	CommEnergyIC(0,IgainL,0x2F6E);   //L line current gain
-	CommEnergyIC(0,Uoffset,0x0000);  //Voltage offset
-	CommEnergyIC(0,IoffsetL,0x0000); //L line current offset
-	CommEnergyIC(0,PoffsetL,0x0000); //L line active power offset
-	CommEnergyIC(0,QoffsetL,0x0000); //L line reactive power offset
-	CommEnergyIC(1,CSTwo,0x0000);    //Checksum 2. Needs to be calculated based off the above values.
-	
-	//CommEnergyIC(0,CalStart,0x8765); //Checks correctness of 21-2B registers and starts normal metering if ok
-	//CommEnergyIC(0,AdjStart,0x8765); //Checks correctness of 31-3A registers and starts normal measurement  if ok
-	
-	if (systemstatus&0xC000){
-		//checksum 1 error
-	}
-	if (systemstatus&0x3000){
-		//checksum 2 error
-	}
+  //Set measurement calibration values
+  CommEnergyIC(0,AdjStart,0x5678); //Measurement calibration startup command, registers 31-3A
+  CommEnergyIC(0,Ugain,0xD464);    //Voltage rms gain
+  CommEnergyIC(0,IgainL,0x6E49);   //L line current gain
+  CommEnergyIC(0,Uoffset,0x0000);  //Voltage offset
+  CommEnergyIC(0,IoffsetL,0x0000); //L line current offset
+  CommEnergyIC(0,PoffsetL,0x0000); //L line active power offset
+  CommEnergyIC(0,QoffsetL,0x0000); //L line reactive power offset
+  CommEnergyIC(0,CSTwo,0xD294); //Write CSTwo, as self calculated
+  
+  Serial.print("Checksum 2:");
+  Serial.println(CommEnergyIC(1,CSTwo,0x0000),HEX);    //Checksum 2. Needs to be calculated based off the above values.
+  
+  CommEnergyIC(0,CalStart,0x8765); //Checks correctness of 21-2B registers and starts normal metering if ok
+  CommEnergyIC(0,AdjStart,0x8765); //Checks correctness of 31-3A registers and starts normal measurement  if ok
 
+  systemstatus = GetSysStatus();
+  
+  if (systemstatus&0xC000){
+    //checksum 1 error
+    Serial.println("Checksum 1 Error!!");
+  }
+  if (systemstatus&0x3000){
+    //checksum 2 error
+    Serial.println("Checksum 2 Error!!");
+  }
 }
 
 
