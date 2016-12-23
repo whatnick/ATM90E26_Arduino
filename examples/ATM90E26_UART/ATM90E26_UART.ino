@@ -1,4 +1,4 @@
-#include <energyic.h>
+#include <energyic_UART.h>
 
 void setup() {
   Serial.begin(115200);

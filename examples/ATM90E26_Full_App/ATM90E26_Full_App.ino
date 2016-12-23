@@ -1,6 +1,5 @@
 #include <Wire.h>
-#include <energyic.h>
-#include <Adafruit_ADS1015.h>
+#include <energyic_UART.h>
 
 
 #include <Adafruit_GFX.h>
