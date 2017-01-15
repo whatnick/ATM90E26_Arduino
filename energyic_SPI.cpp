@@ -55,22 +55,24 @@
   //Read data
   //Do for each byte in transfer
   if(RW)
-  {
+  {  
     for (byte i=0; i<2; i++)
     {
-      /* Transer the byte */
       *data = SPI.transfer (0x00);
       data++;
     }
+	//Transfer16 is not valid on Energia
+	//val = SPI.transfer16(0x00);
   }
   else
   {
     for (byte i=0; i<2; i++)
     {
-      /* Transer the byte */
       SPI.transfer(*data);             // write all the bytes
       data++;
     }
+	//Transfer16 is not valid on Energia
+	//SPI.transfer16(val);
   }
   
 	digitalWrite(energy_CS,HIGH);
@@ -83,6 +85,8 @@
         
 	output=(val>>8)|(val<<8); //reverse MSB and LSB
 	return output;
+	//Use with transfer16
+	//return val;
 }
 
 double  GetLineVoltage(){
