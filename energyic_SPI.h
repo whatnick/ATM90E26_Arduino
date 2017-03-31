@@ -76,7 +76,7 @@ const int energy_CS = D8; // WEMOS SS pin
 #endif
 
 #ifdef  ARDUINO_ESP8266_ESP12  // Adafruit Huzzah
-const int energy_CS = 15; // HUZZAH SS pin
+const int energy_CS = 15; // HUZZAH SS pins ( 0 or 15)
 #endif
 
 #ifdef ARDUINO_ARCH_SAMD //M0 board
@@ -86,18 +86,24 @@ const int energy_CS = 10; // M0 SS pin
 #ifdef __AVR_ATmega32U4__ //32u4 board
 const int energy_CS = 10; // 32u4 SS pin
 #endif 
-//const int energy_WO = 8;
 
-unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val);
-double  GetLineVoltage();
-double GetLineCurrent();
-double GetActivePower();
-double GetFrequency();
-double GetPowerFactor();
-double GetImportEnergy();
-double GetExportEnergy();
-void InitEnergyIC();
-unsigned short GetSysStatus();
-unsigned short  GetMeterStatus();
+class ATM90E26_SPI
+{
+	public:
+		ATM90E26_SPI(int pin=energy_CS);
+		double  GetLineVoltage();
+		double GetLineCurrent();
+		double GetActivePower();
+		double GetFrequency();
+		double GetPowerFactor();
+		double GetImportEnergy();
+		double GetExportEnergy();
+		void InitEnergyIC();
+		unsigned short GetSysStatus();
+		unsigned short  GetMeterStatus();
+	private:
+		unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val);
+		int _cs;
+};
 
 #endif

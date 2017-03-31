@@ -23,31 +23,33 @@
  *******************/
 #include "energyic_SPI.h"
 
+ATM90E26_SPI eic;
+
 void setup() {
   /* Initialize the serial port to host */
   Serial.begin(115200);
   /*Initialise the ATM90E26 + SPI port */
-  InitEnergyIC();
+  eic.InitEnergyIC();
 }
 
 void loop() {
   /*Repeatedly fetch some values from the ATM90E26 */
   Serial.print("Sys Status:");
-  Serial.println(GetSysStatus(),HEX);
+  Serial.println(eic.GetSysStatus(),HEX);
   yield();
   Serial.print("Meter Status:");
-  Serial.println(GetMeterStatus(),HEX);
+  Serial.println(eic.GetMeterStatus(),HEX);
   yield();
   Serial.print("Voltage:");
-  Serial.println(GetLineVoltage());
+  Serial.println(eic.GetLineVoltage());
   yield();
   Serial.print("Current:");
-  Serial.println(GetLineCurrent());
+  Serial.println(eic.GetLineCurrent());
   yield();
   Serial.print("Active power:");
-  Serial.println(GetActivePower());
+  Serial.println(eic.GetActivePower());
   yield();
   Serial.print("p.f.:");
-  Serial.println(GetPowerFactor());
+  Serial.println(eic.GetPowerFactor());
   delay(1000);
 }

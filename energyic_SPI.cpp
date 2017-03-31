@@ -14,7 +14,12 @@
  #include <SPI.h>
  #include "energyic_SPI.h"
  
- unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val){
+ ATM90E26_SPI::ATM90E26_SPI(int pin)
+ {
+	 _cs = pin;
+ }
+ 
+ unsigned short ATM90E26_SPI::CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val){
 	
 
 	unsigned char* data=(unsigned char*)&val;
@@ -46,7 +51,7 @@
   #endif
   //Disable LoRa chip on M0-LoRa
   digitalWrite (8,HIGH);     
-	digitalWrite (energy_CS,LOW);
+	digitalWrite (_cs,LOW);
   delayMicroseconds(10);
 	SPI.transfer(address);
   /* Must wait 4 us for data to become valid */
@@ -75,7 +80,7 @@
 	//SPI.transfer16(val);
   }
   
-	digitalWrite(energy_CS,HIGH);
+	digitalWrite(_cs,HIGH);
   //Reenable LoRa chip on M0-LoRa
   digitalWrite(8,LOW);
   delayMicroseconds(10);
@@ -89,31 +94,31 @@
 	//return val;
 }
 
-double  GetLineVoltage(){
+double  ATM90E26_SPI::GetLineVoltage(){
 	unsigned short voltage=CommEnergyIC(1,Urms,0xFFFF);
 	return (double)voltage/100;
 }
 
-unsigned short  GetMeterStatus(){
+unsigned short ATM90E26_SPI::GetMeterStatus(){
   return CommEnergyIC(1,EnStatus,0xFFFF);
 }
 
-double GetLineCurrent(){
+double ATM90E26_SPI::GetLineCurrent(){
 	unsigned short current=CommEnergyIC(1,Irms,0xFFFF);
 	return (double)current/1000;
 }
 
-double GetActivePower(){
+double ATM90E26_SPI::GetActivePower(){
 	short int apower= (short int)CommEnergyIC(1,Pmean,0xFFFF); //Complement, MSB is signed bit
 	return (double)apower;
 }
 
-double GetFrequency(){
+double ATM90E26_SPI::GetFrequency(){
 	unsigned short freq=CommEnergyIC(1,Freq,0xFFFF);
 	return (double)freq/100;
 }
 
-double GetPowerFactor(){
+double ATM90E26_SPI::GetPowerFactor(){
 	short int pf= (short int)CommEnergyIC(1,PowerF,0xFFFF); //MSB is signed bit
 	//if negative
 	if(pf&0x8000){
@@ -122,28 +127,28 @@ double GetPowerFactor(){
 	return (double)pf/1000;
 }
 
-double GetImportEnergy(){
+double ATM90E26_SPI::GetImportEnergy(){
 	//Register is cleared after reading
 	unsigned short ienergy=CommEnergyIC(1,APenergy,0xFFFF);
 	return (double)ienergy/10/1000; //returns kWh if PL constant set to 1000imp/kWh
 }
 
-double GetExportEnergy(){
+double ATM90E26_SPI::GetExportEnergy(){
 	//Register is cleared after reading
 	unsigned short eenergy=CommEnergyIC(1,ANenergy,0xFFFF);
 	return (double)eenergy/10/1000; //returns kWh if PL constant set to 1000imp/kWh
 }
 
-unsigned short GetSysStatus(){
+unsigned short ATM90E26_SPI::GetSysStatus(){
 	return CommEnergyIC(1,SysStatus,0xFFFF);
 }
 
 
-void InitEnergyIC(){
+void ATM90E26_SPI::InitEnergyIC(){
 	unsigned short systemstatus;
         
 	//pinMode(energy_IRQ,INPUT );
-	pinMode(energy_CS,OUTPUT );
+	pinMode(_cs,OUTPUT );
 	//pinMode(energy_WO,INPUT );
  
   /* Enable SPI */  
