@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*
  *  This sketch sends ATM90E26 Energy Monitor data via HTTP POST request to thingspeak server.
  *  It needs the following libraries to work (besides the esp8266 standard libraries supplied with the IDE):
@@ -29,6 +30,11 @@ bool shouldSaveConfig = false;
  
 #include <Wire.h>
 #include <energyic_SPI.h>
+=======
+#include <Wire.h>
+#include <energyic_UART.h>
+
+>>>>>>> UART
 
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
@@ -46,6 +52,7 @@ Adafruit_SSD1306 display(OLED_RESET);
 #include <avr/pgmspace.h>
 #endif
 
+<<<<<<< HEAD
 const char* server = "api.thingspeak.com";
 // Sign up on thingspeak and get WRITE API KEY.
 char auth[36] = "THINGSPEAK_KEY";
@@ -125,6 +132,12 @@ void saveTSConfig()
 void setup() {
   Serial.begin(115200);
   
+=======
+void setup() {
+  Serial.begin(115200);
+  Serial.print("Start ATM90");
+  InitEnergyIC();
+>>>>>>> UART
   Wire.begin();
   
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x32)
@@ -136,6 +149,7 @@ void setup() {
   display.display();
   display.setTextSize(1);
   display.setTextColor(WHITE);
+<<<<<<< HEAD
   
   //Read previous config
   readTSConfig();
@@ -177,11 +191,14 @@ void setup() {
   eic1.InitEnergyIC();
   eic2.InitEnergyIC();
   
+=======
+>>>>>>> UART
   delay(1000);
 }
 
 void loop() {
   /*Repeatedly fetch some values from the ATM90E26 */
+<<<<<<< HEAD
   unsigned short s_status = eic1.GetSysStatus();
   if(s_status == 0xFFFF)
   {
@@ -191,6 +208,9 @@ void loop() {
   #endif
   }
   s_status = eic2.GetSysStatus();
+=======
+  unsigned short s_status = GetSysStatus();
+>>>>>>> UART
   if(s_status == 0xFFFF)
   {
   #if defined(ESP8266)
@@ -198,6 +218,7 @@ void loop() {
     ESP.restart();
   #endif
   }
+<<<<<<< HEAD
   
   float Vrms1 = eic1.GetLineVoltage();
   float Crms1 = eic1.GetLineCurrent();
@@ -254,10 +275,25 @@ void loop() {
      client.print(postStr);  
   }
   client.stop();
+=======
+  float Vrms = GetLineVoltage();
+  float Crms = GetLineCurrent();
+  float realPower = GetActivePower();
+  float powerFactor = GetPowerFactor();
+
+  Serial.print(realPower);
+  Serial.print(",");
+  Serial.print(Crms);
+  Serial.print(",");
+  Serial.print(Vrms);
+  Serial.print(",");
+  Serial.println(powerFactor);
+>>>>>>> UART
   
   display.clearDisplay();
   display.setCursor(0,0);
   display.print("Vrms: ");
+<<<<<<< HEAD
   display.print(Vrms1);
   display.print(",");
   display.println(Vrms2);
@@ -283,3 +319,17 @@ void loop() {
   
   delay(15000);
 }
+=======
+  display.println(Vrms);
+  display.print("Irms: ");
+  display.println(Crms);
+  display.print("Power: ");
+  display.println(realPower);
+  display.print("p.f.: ");
+  display.println(powerFactor);
+  
+  display.display();
+  
+  delay(10);
+}
+>>>>>>> UART
