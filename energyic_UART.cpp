@@ -41,7 +41,11 @@ SoftwareSerial ATMSerial(11, 13); //RX, TX
 Uart ATMSerial(&sercom1, PIN_SerialATM_RX, PIN_SerialATM_TX, PAD_SerialATM_RX, PAD_SerialATM_TX);
 #endif
 
-unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val)
+ATM90E26_UART::ATM90E26_UART()
+{
+}
+
+unsigned short ATM90E26_UART::CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val)
 {
   unsigned short output;
   //Set read write flag
@@ -99,31 +103,31 @@ unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned sho
 }
  
 
-double  GetLineVoltage(){
+double  ATM90E26_UART::GetLineVoltage(){
 	unsigned short voltage=CommEnergyIC(1,Urms,0xFFFF);
 	return (double)voltage/100;
 }
 
-unsigned short  GetMeterStatus(){
+unsigned short  ATM90E26_UART::GetMeterStatus(){
   return CommEnergyIC(1,EnStatus,0xFFFF);
 }
 
-double GetLineCurrent(){
+double ATM90E26_UART::GetLineCurrent(){
 	unsigned short current=CommEnergyIC(1,Irms,0xFFFF);
 	return (double)current/1000;
 }
 
-double GetActivePower(){
+double ATM90E26_UART::GetActivePower(){
 	short int apower= (short int)CommEnergyIC(1,Pmean,0xFFFF); //Complement, MSB is signed bit
 	return (double)apower;
 }
 
-double GetFrequency(){
+double ATM90E26_UART::GetFrequency(){
 	unsigned short freq=CommEnergyIC(1,Freq,0xFFFF);
 	return (double)freq/100;
 }
 
-double GetPowerFactor(){
+double ATM90E26_UART::GetPowerFactor(){
 	short int pf= (short int)CommEnergyIC(1,PowerF,0xFFFF); //MSB is signed bit
 	//if negative
 	if(pf&0x8000){
@@ -132,24 +136,24 @@ double GetPowerFactor(){
 	return (double)pf/1000;
 }
 
-double GetImportEnergy(){
+double ATM90E26_UART::GetImportEnergy(){
 	//Register is cleared after reading
 	unsigned short ienergy=CommEnergyIC(1,APenergy,0xFFFF);
-	return (double)ienergy/10/1000; //returns kWh if PL constant set to 1000imp/kWh
+	return (double)ienergy*0.0001; //returns kWh if PL constant set to 1000imp/kWh
 }
 
-double GetExportEnergy(){
+double ATM90E26_UART::GetExportEnergy(){
 	//Register is cleared after reading
 	unsigned short eenergy=CommEnergyIC(1,ANenergy,0xFFFF);
-	return (double)eenergy/10/1000; //returns kWh if PL constant set to 1000imp/kWh
+	return (double)eenergy*0.0001; //returns kWh if PL constant set to 1000imp/kWh
 }
 
-unsigned short GetSysStatus(){
+unsigned short ATM90E26_UART::GetSysStatus(){
 	return CommEnergyIC(1,SysStatus,0xFFFF);
 }
 
 
-void InitEnergyIC(){
+void ATM90E26_UART::InitEnergyIC(){
 	unsigned short systemstatus;
 	
 	ATMSerial.begin(9600);

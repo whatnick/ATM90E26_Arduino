@@ -130,13 +130,13 @@ double ATM90E26_SPI::GetPowerFactor(){
 double ATM90E26_SPI::GetImportEnergy(){
 	//Register is cleared after reading
 	unsigned short ienergy=CommEnergyIC(1,APenergy,0xFFFF);
-	return (double)ienergy/10/1000; //returns kWh if PL constant set to 1000imp/kWh
+	return (double)ienergy*0.0001; //returns kWh if PL constant set to 1000imp/kWh
 }
 
 double ATM90E26_SPI::GetExportEnergy(){
 	//Register is cleared after reading
 	unsigned short eenergy=CommEnergyIC(1,ANenergy,0xFFFF);
-	return (double)eenergy/10/1000; //returns kWh if PL constant set to 1000imp/kWh
+	return (double)eenergy*0.0001; //returns kWh if PL constant set to 1000imp/kWh
 }
 
 unsigned short ATM90E26_SPI::GetSysStatus(){

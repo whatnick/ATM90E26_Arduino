@@ -70,16 +70,23 @@
 #define PangleTwo 0x6E //Phase Angle between Voltage and N Line Current
 #define SmeanTwo 0x6F //N Line Mean Apparent Power
 
-unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val);
-double  GetLineVoltage();
-double GetLineCurrent();
-double GetActivePower();
-double GetFrequency();
-double GetPowerFactor();
-double GetImportEnergy();
-double GetExportEnergy();
-void InitEnergyIC();
-unsigned short GetSysStatus();
-unsigned short  GetMeterStatus();
+class ATM90E26_UART
+{
+	public:
+		ATM90E26_UART();
+		double  GetLineVoltage();
+		double GetLineCurrent();
+		double GetActivePower();
+		double GetFrequency();
+		double GetPowerFactor();
+		double GetImportEnergy();
+		double GetExportEnergy();
+		void InitEnergyIC();
+		unsigned short GetSysStatus();
+		unsigned short  GetMeterStatus();
+	private:
+		unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val);
+		
+};
 
 #endif
