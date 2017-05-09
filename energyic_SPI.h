@@ -88,9 +88,9 @@ const int energy_CS = 10; // 32u4 SS pin
 #endif 
 
 #if !(defined ARDUINO_ESP8266_WEMOS_D1MINI 
-	|| ARDUINO_ESP8266_ESP12 
-	|| ARDUINO_ARCH_SAMD 
-	|| __AVR_ATmega32U4__)
+	|| defined ARDUINO_ESP8266_ESP12 
+	|| defined ARDUINO_ARCH_SAMD 
+	|| defined __AVR_ATmega32U4__)
 const int energy_CS = SS; // Use default SS pin for unknown Arduino
 #endif
 
