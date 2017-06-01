@@ -12,37 +12,9 @@
 */
 #include <energyic_UART.h>
 
-#if !defined(ARDUINO_ARCH_SAMD)
-#include <SoftwareSerial.h>
-#else
-
-#endif
-
-#if defined(ESP8266)
-//NOTE: Version 1.0 and 1.1 of featherwing use pins 14,12
-//version 1.2 and above using pins 13,14
-SoftwareSerial ATMSerial(14, 12, false, 256); //RX, TX v1.0-1.1
-//SoftwareSerial ATMSerial(13, 14, false, 256); //RX, TX v1.2+
-#endif 
-
-#ifdef __AVR_ATmega32U4__ //32u4 board
-SoftwareSerial ATMSerial(11, 13); //RX, TX
-#endif 
-
-#if defined(ARDUINO_ARCH_SAMD)
-#include "wiring_private.h" // pinPeripheral() function
-//Feather M0 
-#define PIN_SerialATM_RX       12ul
-#define PIN_SerialATM_TX       11ul
-#define PAD_SerialATM_RX       (SERCOM_RX_PAD_3)
-#define PAD_SerialATM_TX       (UART_TX_PAD_0)
-
-// Using SERCOM1 on M0 to communicate with ATM90E26
-Uart ATMSerial(&sercom1, PIN_SerialATM_RX, PIN_SerialATM_TX, PAD_SerialATM_RX, PAD_SerialATM_TX);
-#endif
-
-ATM90E26_UART::ATM90E26_UART()
+ATM90E26_UART::ATM90E26_UART(Stream* UART)
 {
+	ATM_UART = UART;
 }
 
 unsigned short ATM90E26_UART::CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val)
@@ -59,25 +31,25 @@ unsigned short ATM90E26_UART::CommEnergyIC(unsigned char RW,unsigned char addres
   }
 
   //begin UART command
-  ATMSerial.write(0xFE);
-  ATMSerial.write(address);
+  ATM_UART->write(0xFE);
+  ATM_UART->write(address);
   
   if(!RW)
   {
       byte MSBWrite = val>>8;
       byte LSBWrite = val&0xFF;
-      ATMSerial.write(MSBWrite);
-      ATMSerial.write(LSBWrite);
+      ATM_UART->write(MSBWrite);
+      ATM_UART->write(LSBWrite);
   }
-  ATMSerial.write(host_chksum);
+  ATM_UART->write(host_chksum);
   delay(10);
 
   //Read register only
   if(RW)
   {
-    byte MSByte = ATMSerial.read();
-    byte LSByte = ATMSerial.read();
-    byte atm90_chksum = ATMSerial.read();
+    byte MSByte = ATM_UART->read();
+    byte LSByte = ATM_UART->read();
+    byte atm90_chksum = ATM_UART->read();
   
     if(atm90_chksum == ((LSByte + MSByte) & 0xFF))
     {
@@ -92,7 +64,7 @@ unsigned short ATM90E26_UART::CommEnergyIC(unsigned char RW,unsigned char addres
   //Write register only
   else
   {
-    byte atm90_chksum = ATMSerial.read();
+    byte atm90_chksum = ATM_UART->read();
     if(atm90_chksum != host_chksum)
     {
       Serial.println("Write failed");
@@ -152,16 +124,11 @@ unsigned short ATM90E26_UART::GetSysStatus(){
 	return CommEnergyIC(1,SysStatus,0xFFFF);
 }
 
-
+/*
+Initialise Energy IC, assume UART has already began in the main code
+*/
 void ATM90E26_UART::InitEnergyIC(){
 	unsigned short systemstatus;
-	
-	ATMSerial.begin(9600);
-	
-	#if defined(ARDUINO_ARCH_SAMD)
-	pinPeripheral(PIN_SerialATM_RX, PIO_SERCOM);
-	pinPeripheral(PIN_SerialATM_TX, PIO_SERCOM);
-	#endif
 	
 	CommEnergyIC(0,SoftReset,0x789A); //Perform soft reset
 	CommEnergyIC(0,FuncEn,0x0030); //Voltage sag irq=1, report on warnout pin=1, energy dir change irq=0

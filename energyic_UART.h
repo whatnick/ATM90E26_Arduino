@@ -73,7 +73,7 @@
 class ATM90E26_UART
 {
 	public:
-		ATM90E26_UART();
+		ATM90E26_UART(Stream* UART);
 		double  GetLineVoltage();
 		double GetLineCurrent();
 		double GetActivePower();
@@ -86,7 +86,7 @@ class ATM90E26_UART
 		unsigned short  GetMeterStatus();
 	private:
 		unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val);
-		
+		Stream* ATM_UART;
 };
 
 #endif
