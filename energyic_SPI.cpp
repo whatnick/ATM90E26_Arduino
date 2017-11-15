@@ -17,7 +17,17 @@
  ATM90E26_SPI::ATM90E26_SPI(int pin)
  {
 	 _cs = pin;
+	 _lgain = 0x1D39;
+	 _ugain = 0xD464;
+	 _igain = 0x6E49;
+	 _crc1 = 0x4A34;
+	 _crc2 = 0xD294;
  }
+void ATM90E26_SPI::SetLGain(unsigned short lgain) { _lgain = lgain;}
+void ATM90E26_SPI::SetUGain(unsigned short ugain) { _ugain = ugain ;}
+void ATM90E26_SPI::SetIGain(unsigned short igain) { _igain = igain ;}
+void ATM90E26_SPI::SetCRC1(unsigned short crc1) { _crc1 = crc1;}
+void ATM90E26_SPI::SetCRC2(unsigned short crc2) { _crc2 = crc2;}
  
  unsigned short ATM90E26_SPI::CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val){
 	
@@ -169,14 +179,14 @@ void ATM90E26_SPI::InitEnergyIC(){
   CommEnergyIC(0,CalStart,0x5678); //Metering calibration startup command. Register 21 to 2B need to be set
   CommEnergyIC(0,PLconstH,0x00B9); //PL Constant MSB
   CommEnergyIC(0,PLconstL,0xC1F3); //PL Constant LSB
-  CommEnergyIC(0,Lgain,0x1D39);   //Line calibration gain
+  CommEnergyIC(0,Lgain,_lgain);   //Line calibration gain
   CommEnergyIC(0,Lphi,0x0000); //Line calibration angle
   CommEnergyIC(0,PStartTh,0x08BD); //Active Startup Power Threshold
   CommEnergyIC(0,PNolTh,0x0000); //Active No-Load Power Threshold
   CommEnergyIC(0,QStartTh,0x0AEC); //Reactive Startup Power Threshold
   CommEnergyIC(0,QNolTh,0x0000); //Reactive No-Load Power Threshold
   CommEnergyIC(0,MMode,0x9422); //Metering Mode Configuration. All defaults. See pg 31 of datasheet.
-  CommEnergyIC(0,CSOne,0x4A34); //Write CSOne, as self calculated
+  CommEnergyIC(0,CSOne,_crc1); //Write CSOne, as self calculated
   
   Serial.print("Checksum 1:");
   Serial.println(CommEnergyIC(1,CSOne,0x0000),HEX); //Checksum 1. Needs to be calculated based off the above values.
@@ -184,13 +194,13 @@ void ATM90E26_SPI::InitEnergyIC(){
 
   //Set measurement calibration values
   CommEnergyIC(0,AdjStart,0x5678); //Measurement calibration startup command, registers 31-3A
-  CommEnergyIC(0,Ugain,0xD464);    //Voltage rms gain
-  CommEnergyIC(0,IgainL,0x6E49);   //L line current gain
+  CommEnergyIC(0,Ugain,_ugain);    //Voltage rms gain
+  CommEnergyIC(0,IgainL,_igain);   //L line current gain
   CommEnergyIC(0,Uoffset,0x0000);  //Voltage offset
   CommEnergyIC(0,IoffsetL,0x0000); //L line current offset
   CommEnergyIC(0,PoffsetL,0x0000); //L line active power offset
   CommEnergyIC(0,QoffsetL,0x0000); //L line reactive power offset
-  CommEnergyIC(0,CSTwo,0xD294); //Write CSTwo, as self calculated
+  CommEnergyIC(0,CSTwo,_crc2); //Write CSTwo, as self calculated
   
   Serial.print("Checksum 2:");
   Serial.println(CommEnergyIC(1,CSTwo,0x0000),HEX);    //Checksum 2. Needs to be calculated based off the above values.

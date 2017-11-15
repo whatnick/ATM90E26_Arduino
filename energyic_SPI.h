@@ -102,12 +102,22 @@ class ATM90E26_SPI
 		double GetPowerFactor();
 		double GetImportEnergy();
 		double GetExportEnergy();
+		void SetUGain(unsigned short);
+		void SetLGain(unsigned short);
+		void SetIGain(unsigned short);
+		void SetCRC1(unsigned short);
+		void SetCRC2(unsigned short);
 		void InitEnergyIC();
 		unsigned short GetSysStatus();
 		unsigned short  GetMeterStatus();
 	private:
 		unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val);
 		int _cs;
+		unsigned short _lgain;
+		unsigned short _ugain;
+		unsigned short _igain;
+		unsigned short _crc1;
+		unsigned short _crc2;
 };
 
 #endif
