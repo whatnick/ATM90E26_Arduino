@@ -14,6 +14,8 @@
 #ifndef __ATM90E26_SPI_H__
 #define __ATM90E26_SPI_H__
 
+#include <Arduino.h>
+
 #define SoftReset 0x00 //Software Reset
 #define SysStatus 0x01 //System Status
 #define FuncEn 0x02 //Function Enable

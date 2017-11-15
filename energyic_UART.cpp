@@ -42,7 +42,11 @@ unsigned short ATM90E26_UART::CommEnergyIC(unsigned char RW,unsigned char addres
       ATM_UART->write(LSBWrite);
   }
   ATM_UART->write(host_chksum);
+  #if defined(ESP32)
+  delay(40); //Somehow, Arduino framework for ESP32 needs this delay
+  #else
   delay(10);
+  #endif
 
   //Read register only
   if(RW)
