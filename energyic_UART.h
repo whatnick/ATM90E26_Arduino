@@ -16,7 +16,7 @@
 
 #include <Arduino.h>
 
-#define SoftReset 0x00 //Software Reset
+#define Reg_SoftReset 0x00 //Software Reset
 #define SysStatus 0x01 //System Status
 #define FuncEn 0x02 //Function Enable
 #define SagTh 0x03 //Voltage Sag Threshold
@@ -70,6 +70,15 @@
 #define PangleTwo 0x6E //Phase Angle between Voltage and N Line Current
 #define SmeanTwo 0x6F //N Line Mean Apparent Power
 
+#define UART_FirstByte	(0xFE) // first byte send via UART
+#define Reset			(0x789A)
+#define	CalStartup		(0x5678)
+#define	CalCheck		(0x8765)
+#define	WriteReg		(0)
+#define	ReadReg			(1)
+
+
+
 class ATM90E26_UART
 {
 	public:
@@ -81,9 +90,12 @@ class ATM90E26_UART
 		double GetPowerFactor();
 		double GetImportEnergy();
 		double GetExportEnergy();
+		uint16_t GetImportEnergyRaw();
+		uint16_t GetExportEnergyRaw();
 		void InitEnergyIC();
 		unsigned short GetSysStatus();
 		unsigned short  GetMeterStatus();
+
 	private:
 		unsigned short CommEnergyIC(unsigned char RW,unsigned char address, unsigned short val);
 		Stream* ATM_UART;

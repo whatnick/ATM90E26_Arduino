@@ -21,10 +21,10 @@ unsigned short ATM90E26_UART::CommEnergyIC(unsigned char RW,unsigned char addres
 {
   unsigned short output;
   //Set read write flag
-  address|=RW<<7;
+  address |= RW<<7;
 
   byte host_chksum = address;
-  if(!RW)
+  if(RW == WriteReg)
   {
     unsigned short chksum_short = (val>>8) + (val&0xFF) + address;
     host_chksum = chksum_short & 0xFF;
@@ -34,7 +34,7 @@ unsigned short ATM90E26_UART::CommEnergyIC(unsigned char RW,unsigned char addres
   ATM_UART->write(0xFE);
   ATM_UART->write(address);
   
-  if(!RW)
+  if(RW == WriteReg)
   {
       byte MSBWrite = val>>8;
       byte LSBWrite = val&0xFF;
@@ -49,7 +49,7 @@ unsigned short ATM90E26_UART::CommEnergyIC(unsigned char RW,unsigned char addres
   #endif
 
   //Read register only
-  if(RW)
+  if(RW == ReadReg)
   {
     byte MSByte = ATM_UART->read();
     byte LSByte = ATM_UART->read();
@@ -80,52 +80,65 @@ unsigned short ATM90E26_UART::CommEnergyIC(unsigned char RW,unsigned char addres
  
 
 double  ATM90E26_UART::GetLineVoltage(){
-	unsigned short voltage=CommEnergyIC(1,Urms,0xFFFF);
+	unsigned short voltage = CommEnergyIC(ReadReg, Urms, 0xFFFF);
 	return (double)voltage/100;
 }
 
 unsigned short  ATM90E26_UART::GetMeterStatus(){
-  return CommEnergyIC(1,EnStatus,0xFFFF);
+	return CommEnergyIC(ReadReg, EnStatus, 0xFFFF);
 }
 
 double ATM90E26_UART::GetLineCurrent(){
-	unsigned short current=CommEnergyIC(1,Irms,0xFFFF);
+	unsigned short current = CommEnergyIC(ReadReg, Irms, 0xFFFF);
 	return (double)current/1000;
 }
 
 double ATM90E26_UART::GetActivePower(){
-	short int apower= (short int)CommEnergyIC(1,Pmean,0xFFFF); //Complement, MSB is signed bit
+	short int apower = (short int)CommEnergyIC(ReadReg, Pmean, 0xFFFF); //Complement, MSB is signed bit
 	return (double)apower;
 }
 
 double ATM90E26_UART::GetFrequency(){
-	unsigned short freq=CommEnergyIC(1,Freq,0xFFFF);
+	unsigned short freq = CommEnergyIC(ReadReg, Freq, 0xFFFF);
 	return (double)freq/100;
 }
 
 double ATM90E26_UART::GetPowerFactor(){
-	short int pf= (short int)CommEnergyIC(1,PowerF,0xFFFF); //MSB is signed bit
+	short int pf = (short int)CommEnergyIC(ReadReg, PowerF, 0xFFFF); //MSB is signed bit
 	//if negative
 	if(pf&0x8000){
-		pf=(pf&0x7FFF)*-1;
+		pf = (pf&0x7FFF)*-1;
 	}
 	return (double)pf/1000;
 }
 
 double ATM90E26_UART::GetImportEnergy(){
 	//Register is cleared after reading
-	unsigned short ienergy=CommEnergyIC(1,APenergy,0xFFFF);
+	unsigned short ienergy = CommEnergyIC(ReadReg, APenergy, 0xFFFF);
 	return (double)ienergy*0.0001; //returns kWh if PL constant set to 1000imp/kWh
 }
 
 double ATM90E26_UART::GetExportEnergy(){
 	//Register is cleared after reading
-	unsigned short eenergy=CommEnergyIC(1,ANenergy,0xFFFF);
+	unsigned short eenergy = CommEnergyIC(ReadReg, ANenergy, 0xFFFF);
 	return (double)eenergy*0.0001; //returns kWh if PL constant set to 1000imp/kWh
 }
 
+uint16_t ATM90E26_UART::GetImportEnergyRaw()
+{
+	uint16_t ienergy = CommEnergyIC(ReadReg, APenergy, 0xFFFF);
+	return ienergy;
+}
+
+uint16_t ATM90E26_UART::GetExportEnergyRaw()
+{
+	//Register is cleared after reading
+	uint16_t eenergy = CommEnergyIC(ReadReg, ANenergy, 0xFFFF);
+	return eenergy; //returns kWh if PL constant set to 1000imp/kWh
+}
+
 unsigned short ATM90E26_UART::GetSysStatus(){
-	return CommEnergyIC(1,SysStatus,0xFFFF);
+	return CommEnergyIC(ReadReg, SysStatus, 0xFFFF);
 }
 
 /*
@@ -134,43 +147,42 @@ Initialise Energy IC, assume UART has already began in the main code
 void ATM90E26_UART::InitEnergyIC(){
 	unsigned short systemstatus;
 	
-	CommEnergyIC(0,SoftReset,0x789A); //Perform soft reset
-	CommEnergyIC(0,FuncEn,0x0030); //Voltage sag irq=1, report on warnout pin=1, energy dir change irq=0
-	CommEnergyIC(0,SagTh,0x1F2F); //Voltage sag threshhold
+	CommEnergyIC(WriteReg, Reg_SoftReset, Reset); //Perform soft reset
+	CommEnergyIC(WriteReg, FuncEn, 0x0030); //Voltage sag irq=1, report on warnout pin=1, energy dir change irq=0
+	CommEnergyIC(WriteReg, SagTh, 0x1F2F); //Voltage sag threshhold
 		
-
-	//Set metering calibration values
-	CommEnergyIC(0,CalStart,0x5678); //Metering calibration startup command. Register 21 to 2B need to be set
-	CommEnergyIC(0,PLconstH,0x00B9); //PL Constant MSB
-	CommEnergyIC(0,PLconstL,0xC1F3); //PL Constant LSB
-	CommEnergyIC(0,Lgain,0x1D39); 	//Line calibration gain
-	CommEnergyIC(0,Lphi,0x0000); //Line calibration angle
-	CommEnergyIC(0,PStartTh,0x08BD); //Active Startup Power Threshold
-	CommEnergyIC(0,PNolTh,0x0000); //Active No-Load Power Threshold
-	CommEnergyIC(0,QStartTh,0x0AEC); //Reactive Startup Power Threshold
-	CommEnergyIC(0,QNolTh,0x0000); //Reactive No-Load Power Threshold
-	CommEnergyIC(0,MMode,0x9422); //Metering Mode Configuration. All defaults. See pg 31 of datasheet.
-	CommEnergyIC(0,CSOne,0x4A34); //Write CSOne, as self calculated
-	
-	Serial.print("Checksum 1:");
-	Serial.println(CommEnergyIC(1,CSOne,0x0000),HEX); //Checksum 1. Needs to be calculated based off the above values.
-
+	//Set metering calibration values - 1000 pulses
+	CommEnergyIC(WriteReg, CalStart, CalStartup); //Metering calibration startup command. Register 21 to 2B need to be set
+	CommEnergyIC(WriteReg, PLconstH, 0x00B9); 	//PL Constant MSB - 1000 pulses
+	CommEnergyIC(WriteReg, PLconstL, 0xC1F3); 	//PL Constant LSB - 1000 pulses
+	CommEnergyIC(WriteReg, Lgain, 0x1D39); 		//Line calibration gain
+	CommEnergyIC(WriteReg, Lphi, 0x0000); 		//Line calibration angle
+	CommEnergyIC(WriteReg, PStartTh, 0x08BD); 	//Active Startup Power Threshold
+	CommEnergyIC(WriteReg, PNolTh, 0x0000); 	//Active No-Load Power Threshold
+	CommEnergyIC(WriteReg, QStartTh, 0x0AEC); 	//Reactive Startup Power Threshold
+	CommEnergyIC(WriteReg, QNolTh, 0x0000); 	//Reactive No-Load Power Threshold
+	CommEnergyIC(WriteReg, MMode, 0x9422); 		//Metering Mode Configuration. All defaults. See pg 31 of datasheet.
+	CommEnergyIC(WriteReg, CSOne, 0x4A34); 		//Write CSOne, as self calculated
 
 	//Set measurement calibration values
-	CommEnergyIC(0,AdjStart,0x5678); //Measurement calibration startup command, registers 31-3A
-	CommEnergyIC(0,Ugain,0xD464);    //Voltage rms gain
-	CommEnergyIC(0,IgainL,0x6E49);   //L line current gain
-	CommEnergyIC(0,Uoffset,0x0000);  //Voltage offset
-	CommEnergyIC(0,IoffsetL,0x0000); //L line current offset
-	CommEnergyIC(0,PoffsetL,0x0000); //L line active power offset
-	CommEnergyIC(0,QoffsetL,0x0000); //L line reactive power offset
-	CommEnergyIC(0,CSTwo,0xD294); //Write CSTwo, as self calculated
-  
+	CommEnergyIC(WriteReg, AdjStart, 0x5678); 	//Measurement calibration startup command, registers 31-3A
+	CommEnergyIC(WriteReg, Ugain, 0xD464);    	//Voltage rms gain
+	CommEnergyIC(WriteReg, IgainL, 0x6E49);   	//L line current gain
+	CommEnergyIC(WriteReg, Uoffset, 0x0000);  	//Voltage offset
+	CommEnergyIC(WriteReg, IoffsetL, 0x0000); 	//L line current offset
+	CommEnergyIC(WriteReg, PoffsetL, 0x0000); 	//L line active power offset
+	CommEnergyIC(WriteReg, QoffsetL, 0x0000); 	//L line reactive power offset
+	CommEnergyIC(WriteReg, CSTwo, 0xD294); 		//Write CSTwo, as self calculated
+
+	// read the checksum
+	Serial.print("Checksum 1:");
+	Serial.println(CommEnergyIC(ReadReg, CSOne, 0x0000), HEX); //Checksum 1. Needs to be calculated based off the above values.
 	Serial.print("Checksum 2:");
-	Serial.println(CommEnergyIC(1,CSTwo,0x0000),HEX);    //Checksum 2. Needs to be calculated based off the above values.
+	Serial.println(CommEnergyIC(ReadReg, CSTwo, 0x0000),HEX);    //Checksum 2. Needs to be calculated based off the above values.
 	
-	CommEnergyIC(0,CalStart,0x8765); //Checks correctness of 21-2B registers and starts normal metering if ok
-	CommEnergyIC(0,AdjStart,0x8765); //Checks correctness of 31-3A registers and starts normal measurement  if ok
+	// check if checksum is correct - needs to be calculated based on register values (use the excel sheet)
+	CommEnergyIC(WriteReg, CalStart, CalCheck); //Checks correctness of 21-2B registers and starts normal metering if ok
+	CommEnergyIC(WriteReg, AdjStart, CalCheck); //Checks correctness of 31-3A registers and starts normal measurement  if ok
 
 	systemstatus = GetSysStatus();
   
@@ -183,11 +195,3 @@ void ATM90E26_UART::InitEnergyIC(){
 		Serial.println("Checksum 2 Error!!");
 	}
 }
-
-
-
-
-
-
-
-
