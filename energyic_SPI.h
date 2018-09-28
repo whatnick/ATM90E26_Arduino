@@ -73,25 +73,17 @@
 // pins used for the connection with the sensor
 // the other you need are controlled by the SPI library):
 //const int energy_IRQ = 2;
-#ifdef  ARDUINO_ESP8266_WEMOS_D1MINI  // WeMos mini and D1 R2
+#if defined(ARDUINO_ESP8266_WEMOS_D1MINI)  // WeMos mini and D1 R2
 const int energy_CS = D8; // WEMOS SS pin
-#endif
-
-#ifdef  ARDUINO_ESP8266_ESP12  // Adafruit Huzzah
+#elif defined(ARDUINO_ESP8266_ESP12)  // Adafruit Huzzah
 const int energy_CS = 15; // HUZZAH SS pins ( 0 or 15)
-#endif
-
-#ifdef ARDUINO_ARCH_SAMD //M0 board
+#elif defined(ARDUINO_ARCH_SAMD) //M0 board
 const int energy_CS = 10; // M0 SS pin
-#endif 
-
-#ifdef __AVR_ATmega32U4__ //32u4 board
+#elif defined(__AVR_ATmega32U4__) //32u4 board
 const int energy_CS = 10; // 32u4 SS pin
-#endif 
-
-#if !(defined ARDUINO_ESP8266_WEMOS_D1MINI || defined ARDUINO_ESP8266_ESP12 || defined ARDUINO_ARCH_SAMD || defined __AVR_ATmega32U4__)
+#else
 const int energy_CS = SS; // Use default SS pin for unknown Arduino
-#endif
+#endif  // defined(ARDUINO_ESP8266_WEMOS_D1MINI)
 
 class ATM90E26_SPI
 {
