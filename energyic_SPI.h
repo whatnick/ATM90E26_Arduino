@@ -92,6 +92,9 @@ class ATM90E26_SPI
 		double  GetLineVoltage();
 		double GetLineCurrent();
 		double GetActivePower();
+		double GetReactivePower();
+		double GetApparentPower();
+		double GetPhaseAngle();
 		double GetFrequency();
 		double GetPowerFactor();
 		double GetImportEnergy();

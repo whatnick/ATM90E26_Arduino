@@ -116,6 +116,21 @@ double ATM90E26_SPI::GetActivePower(){
 	return (double)apower;
 }
 
+double ATM90E26_SPI::GetReactivePower(){
+	short int apower= (short int)CommEnergyIC(1,Qmean,0xFFFF); //Complement, MSB is signed bit
+	return (double)apower;
+}
+
+double ATM90E26_SPI::GetApparentPower(){
+	short int apower= (short int)CommEnergyIC(1,Smean,0xFFFF); //Complement, MSB is signed bit
+	return (double)apower;
+}
+
+double ATM90E26_SPI::GetPhaseAngle(){
+	short int apower= (short int)CommEnergyIC(1,Pangle,0xFFFF); //Complement, MSB is signed bit
+	return (double)apower;
+}
+
 double ATM90E26_SPI::GetFrequency(){
 	unsigned short freq=CommEnergyIC(1,Freq,0xFFFF);
 	return (double)freq/100;
