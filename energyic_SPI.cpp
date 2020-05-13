@@ -37,14 +37,7 @@ void ATM90E26_SPI::SetCRC2(unsigned short crc2) { _crc2 = crc2;}
   //SPI interface rate is 200 to 160k bps. It Will need to be slowed down for EnergyIC
   #if !defined(ENERGIA) && !defined(ESP8266) && !defined(ARDUINO_ARCH_SAMD)
   SPISettings settings(200000, MSBFIRST, SPI_MODE3);
-  #endif
-   
-
-  #if defined(ESP8266)
-  SPISettings settings(200000, MSBFIRST, SPI_MODE2);
-  #endif
-
-  #if defined(ARDUINO_ARCH_SAMD)
+  #else
   SPISettings settings(200000, MSBFIRST, SPI_MODE3);
   #endif
    
