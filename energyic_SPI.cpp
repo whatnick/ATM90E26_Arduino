@@ -181,6 +181,8 @@ void ATM90E26_SPI::InitEnergyIC() {
 
   // pinMode(energy_IRQ,INPUT );
   pinMode(_cs, OUTPUT);
+  digitalWrite(_cs, HIGH);
+  delay(10);
   // pinMode(energy_WO,INPUT );
 
   /* Enable SPI */
