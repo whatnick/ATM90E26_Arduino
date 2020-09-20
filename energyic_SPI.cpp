@@ -60,16 +60,35 @@ void ATM90E26_SPI::SetIGain(unsigned short igain) { measurement[_igain] = igain;
 void ATM90E26_SPI::SetCRC1(unsigned short crc1) { _crc1 = crc1; }
 void ATM90E26_SPI::SetCRC2(unsigned short crc2) { _crc2 = crc2; }
 
-// return or set?
-unsigned short ATM90E26_SPI::CalcCheckSum() {
+unsigned short ATM90E26_SPI::CalcCheckSum(int checksum_id) {
   //#CS1: metering
   // L2C=MOD(H21+H22+...+H2B+L21+L22+...+L2B, 2^8)
   // H2C=H21 XOR H22 XOR ... XOR H2B XOR L21 XOR L22 XOR ... XORL2
-
+  if (checksum_id == 1){
+    unsigned char l2c = 0;
+    unsigned char h2c = 0;
+    for (int i = 0; i < 11; i++){
+      l2c += metering[i];
+      l2c += metering[i]>>8;
+      h2c ^= metering[i];
+      h2c ^= metering[i]>>8;
+    }
+    return ((unsigned short)h2c << 8) | l2c;
+  }
   //#CS2: measurement
   // L3B=MOD(H31+H32+...+H3A+L31+L32+...+L3A, 2^8)
   // H3B=H31 XOR H32 XOR ... XOR H3A XOR L31 XOR L32 XOR ... XORL3A
-
+  else if(checksum_id == 2){
+    unsigned char l3b = 0;
+    unsigned char h3b = 0;
+    for (int i = 0; i < 10; i++){
+      l3b += measurement[i];
+      l3b += measurement[i]>>8;
+      h3b ^= measurement[i];
+      h3b ^= measurement[i]>>8;
+    }
+    return ((unsigned short)h3b << 8) | l3b;
+  }
   return 0;
 }
 

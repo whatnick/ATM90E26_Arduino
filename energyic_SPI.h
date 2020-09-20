@@ -139,11 +139,11 @@ public:
   void InitEnergyIC();
   unsigned short GetSysStatus();
   unsigned short GetMeterStatus();
+  unsigned short CalcCheckSum(int checksum_id);
 
 private:
   unsigned short CommEnergyIC(unsigned char RW, unsigned char address,
                               unsigned short val);
-  unsigned short CalcCheckSum();
   int _cs;
 
   unsigned short metering[11];
