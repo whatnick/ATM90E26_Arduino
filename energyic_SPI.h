@@ -37,28 +37,49 @@
 #define LSB 0x08       // RMS/Power 16-bit LSB
 #define CalStart 0x20  // Calibration Start Command
 #define PLconstH 0x21  // High Word of PL_Constant
-#define PLconstL 0x22  // Low Word of PL_Constant
-#define Lgain 0x23     // L Line Calibration Gain
-#define Lphi 0x24      // L Line Calibration Angle
-#define Ngain 0x25     // N Line Calibration Gain
-#define Nphi 0x26      // N Line Calibration Angle
-#define PStartTh 0x27  // Active Startup Power Threshold
-#define PNolTh 0x28    // Active No-Load Power Threshold
-#define QStartTh 0x29  // Reactive Startup Power Threshold
-#define QNolTh 0x2A    // Reactive No-Load Power Threshold
-#define MMode 0x2B     // Metering Mode Configuration
-#define CSOne 0x2C     // Checksum 1
-#define AdjStart 0x30  // Measurement Calibration Start Command
-#define Ugain 0x31     // Voltage rms Gain
-#define IgainL 0x32    // L Line Current rms Gain
-#define IgainN 0x33    // N Line Current rms Gain
-#define Uoffset 0x34   // Voltage Offset
-#define IoffsetL 0x35  // L Line Current Offset
-#define IoffsetN 0x36  // N Line Current Offse
-#define PoffsetL 0x37  // L Line Active Power Offset
-#define QoffsetL 0x38  // L Line Reactive Power Offset
-#define PoffsetN 0x39  // N Line Active Power Offset
-#define QoffsetN 0x3A  // N Line Reactive Power Offset
+#define PLconstH_Default 0x0015
+#define PLconstL 0x22 // Low Word of PL_Constant
+#define PLconstL_Default 0xD174
+#define Lgain 0x23 // L Line Calibration Gain
+#define Lgain_Default 0x0000
+#define Lphi 0x24 // L Line Calibration Angle
+#define Lphi_Default 0x0000
+#define Ngain 0x25 // N Line Calibration Gain
+#define Ngain_Default 0x0000
+#define Nphi 0x26 // N Line Calibration Angle
+#define Nphi_Default 0x0000
+#define PStartTh 0x27 // Active Startup Power Threshold
+#define PStartTh_Default 0x08BD
+#define PNolTh 0x28 // Active No-Load Power Threshold
+#define PNolTh_Default 0x0000
+#define QStartTh 0x29 // Reactive Startup Power Threshold
+#define QStartTh_Default 0x0AEC
+#define QNolTh 0x2A // Reactive No-Load Power Threshold
+#define QNolTh_Default 0x0000
+#define MMode 0x2B // Metering Mode Configuration
+#define MMode_Default 0x9422
+#define CSOne 0x2C    // Checksum 1
+#define AdjStart 0x30 // Measurement Calibration Start Command
+#define Ugain 0x31    // Voltage rms Gain
+#define Ugain_Default 0x6720
+#define IgainL 0x32 // L Line Current rms Gain
+#define IgainL_Default 0x7A13
+#define IgainN 0x33 // N Line Current rms Gain
+#define IgainN_Default 0x7530
+#define Uoffset 0x34 // Voltage Offset
+#define Uoffset_Default 0x0000
+#define IoffsetL 0x35 // L Line Current Offset
+#define IoffsetL_Default 0x0000
+#define IoffsetN 0x36 // N Line Current Offse
+#define IoffsetN_Default 0x0000
+#define PoffsetL 0x37 // L Line Active Power Offset
+#define PoffsetL_Default 0x0000
+#define QoffsetL 0x38 // L Line Reactive Power Offset
+#define QoffsetL_Default 0x0000
+#define PoffsetN 0x39 // N Line Active Power Offset
+#define PoffsetN_Default 0x0000
+#define QoffsetN 0x3A // N Line Reactive Power Offset
+#define QoffsetN_Default 0x0000
 #define CSTwo 0x3B     // Checksum 2
 #define APenergy 0x40  // Forward Active Energy
 #define ANenergy 0x41  // Reverse Active Energy
@@ -122,11 +143,37 @@ public:
 private:
   unsigned short CommEnergyIC(unsigned char RW, unsigned char address,
                               unsigned short val);
+  unsigned short CalcCheckSum();
   int _cs;
-  unsigned short _lgain;
-  unsigned short _ugain;
-  unsigned short _igain;
+
+  unsigned short metering[11];
+  enum metering_values {
+    _plconsth,
+    _plconstl,
+    _lgain,
+    _lphi,
+    _ngain,
+    _nphi,
+    _pstartth,
+    _pnolth,
+    _qstartth,
+    _qnolth,
+    _mmode
+  };
   unsigned short _crc1;
+  unsigned short measurement[10];
+  enum measurement_values {
+    _ugain,
+    _igain,
+    _igainn,
+    _uoffset,
+    _ioffestl,
+    _ioffsetn,
+    _poffestl,
+    _qoffsetl,
+    _poffsetn,
+    _qoffsetn
+  };
   unsigned short _crc2;
 };
 

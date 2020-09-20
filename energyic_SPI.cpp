@@ -28,17 +28,50 @@
 
 ATM90E26_SPI::ATM90E26_SPI(int pin) {
   _cs = pin;
-  _lgain = 0x1D39;
-  _ugain = 0xD464;
-  _igain = 0x6E49;
+
+  metering[_plconsth] = 0x00B9;
+  metering[_plconstl] = 0xC1F3;
+  metering[_lgain] = 0x1D39;
+  metering[_lphi] = Lphi_Default;
+  metering[_ngain] = Ngain_Default;
+  metering[_nphi] = Nphi_Default;
+  metering[_pstartth] = PStartTh_Default;
+  metering[_pnolth] = PNolTh_Default;
+  metering[_qstartth] = QStartTh_Default;
+  metering[_qnolth] = QNolTh_Default;
+  metering[_mmode] = MMode_Default;
   _crc1 = 0x4A34;
+
+  measurement[_ugain] = 0xD464;
+  measurement[_igain] = 0x6E49;
+  measurement[_igainn] = IgainN_Default;
+  measurement[_uoffset] = Uoffset_Default;
+  measurement[_ioffestl] = IoffsetL_Default;
+  measurement[_ioffsetn] = IoffsetN_Default;
+  measurement[_poffestl] = PoffsetL_Default;
+  measurement[_qoffsetl] = QoffsetL_Default;
+  measurement[_poffsetn] = PoffsetN_Default;
+  measurement[_qoffsetn] = QoffsetN_Default;
   _crc2 = 0xD294;
 }
-void ATM90E26_SPI::SetLGain(unsigned short lgain) { _lgain = lgain; }
-void ATM90E26_SPI::SetUGain(unsigned short ugain) { _ugain = ugain; }
-void ATM90E26_SPI::SetIGain(unsigned short igain) { _igain = igain; }
+void ATM90E26_SPI::SetLGain(unsigned short lgain) { metering[_lgain] = lgain; }
+void ATM90E26_SPI::SetUGain(unsigned short ugain) { measurement[_ugain] = ugain; }
+void ATM90E26_SPI::SetIGain(unsigned short igain) { measurement[_igain] = igain; }
 void ATM90E26_SPI::SetCRC1(unsigned short crc1) { _crc1 = crc1; }
 void ATM90E26_SPI::SetCRC2(unsigned short crc2) { _crc2 = crc2; }
+
+// return or set?
+unsigned short ATM90E26_SPI::CalcCheckSum() {
+  //#CS1: metering
+  // L2C=MOD(H21+H22+...+H2B+L21+L22+...+L2B, 2^8)
+  // H2C=H21 XOR H22 XOR ... XOR H2B XOR L21 XOR L22 XOR ... XORL2
+
+  //#CS2: measurement
+  // L3B=MOD(H31+H32+...+H3A+L31+L32+...+L3A, 2^8)
+  // H3B=H31 XOR H32 XOR ... XOR H3A XOR L31 XOR L32 XOR ... XORL3A
+
+  return 0;
+}
 
 unsigned short ATM90E26_SPI::CommEnergyIC(unsigned char RW,
                                           unsigned char address,
@@ -195,22 +228,15 @@ void ATM90E26_SPI::InitEnergyIC() {
 
   CommEnergyIC(0, SoftReset, 0x789A); // Perform soft reset
   CommEnergyIC(0, FuncEn, 0x0030);    // Voltage sag irq=1, report on warnout
-                                   // pin=1, energy dir change irq=0
-  CommEnergyIC(0, SagTh, 0x1F2F); // Voltage sag threshhold
+                                      // pin=1, energy dir change irq=0
+  CommEnergyIC(0, SagTh, 0x1F2F);     // Voltage sag threshhold
 
   // Set metering calibration values
   CommEnergyIC(0, CalStart, 0x5678); // Metering calibration startup command.
                                      // Register 21 to 2B need to be set
-  CommEnergyIC(0, PLconstH, 0x00B9); // PL Constant MSB
-  CommEnergyIC(0, PLconstL, 0xC1F3); // PL Constant LSB
-  CommEnergyIC(0, Lgain, _lgain);    // Line calibration gain
-  CommEnergyIC(0, Lphi, 0x0000);     // Line calibration angle
-  CommEnergyIC(0, PStartTh, 0x08BD); // Active Startup Power Threshold
-  CommEnergyIC(0, PNolTh, 0x0000);   // Active No-Load Power Threshold
-  CommEnergyIC(0, QStartTh, 0x0AEC); // Reactive Startup Power Threshold
-  CommEnergyIC(0, QNolTh, 0x0000);   // Reactive No-Load Power Threshold
-  CommEnergyIC(0, MMode, 0x9422); // Metering Mode Configuration. All defaults.
-                                  // See pg 31 of datasheet.
+  CommEnergyIC(0, PLconstH, metering[_plconsth]); // PL Constant MSB
+  CommEnergyIC(0, PLconstL, metering[_plconstl]); // PL Constant LSB
+  CommEnergyIC(0, Lgain, metering[_lgain]);       // Line calibration gain
   CommEnergyIC(0, CSOne, _crc1); // Write CSOne, as self calculated
 
   Serial.print("Checksum 1:");
@@ -222,13 +248,9 @@ void ATM90E26_SPI::InitEnergyIC() {
   CommEnergyIC(
       0, AdjStart,
       0x5678); // Measurement calibration startup command, registers 31-3A
-  CommEnergyIC(0, Ugain, _ugain);    // Voltage rms gain
-  CommEnergyIC(0, IgainL, _igain);   // L line current gain
-  CommEnergyIC(0, Uoffset, 0x0000);  // Voltage offset
-  CommEnergyIC(0, IoffsetL, 0x0000); // L line current offset
-  CommEnergyIC(0, PoffsetL, 0x0000); // L line active power offset
-  CommEnergyIC(0, QoffsetL, 0x0000); // L line reactive power offset
-  CommEnergyIC(0, CSTwo, _crc2);     // Write CSTwo, as self calculated
+  CommEnergyIC(0, Ugain, measurement[_ugain]);  // Voltage rms gain
+  CommEnergyIC(0, IgainL, measurement[_igain]); // L line current gain
+  CommEnergyIC(0, CSTwo, _crc2); // Write CSTwo, as self calculated
 
   Serial.print("Checksum 2:");
   Serial.println(
