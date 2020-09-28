@@ -39,6 +39,8 @@ unsigned short ATM90E26_UART::CommEnergyIC(unsigned char RW,
     host_chksum = chksum_short & 0xFF;
   }
 
+  // Clear out any data left in the buffer so it does not interfere later
+  ATM_UART->read();
   // begin UART command
   ATM_UART->write(0xFE);
   ATM_UART->write(address);
