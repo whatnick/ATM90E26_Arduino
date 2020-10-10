@@ -18,4 +18,5 @@ This documentation is designed to capture basics only. For detailed information 
     - Thermal considerations
     - Voltage Sensor Considerations
     - Current Sensor Considerations
+        - [CT Article](https://learn.openenergymonitor.org/electricity-monitoring/ct-sensors/introduction)
     - Commercial Calibration instruments from [Fluke](http://download.flukecal.com/pub/literature/1262701C_EN_w.pdf)
