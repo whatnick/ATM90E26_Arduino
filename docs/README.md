@@ -10,8 +10,8 @@
 - Calibration and usage in practice
     
   - [Calibration Excel Sheet](./Energy%20setpoint%20calculator.xlsx)
-  - [Using calibrations in the library](./Calibration.md)
-  - Electrical Setup for Calibrations
+  - [Using calibrations in the library](./Calibration_Software.md)
+  - [Electrical Setup for Calibrations](./Calibration_Hardware.md)
   - [Sample usage video for breakout](https://youtu.be/QOhXIIofPQk)
   - [Sample usage video for featherwing](https://youtu.be/YI2-IAKHrNQ)
   - Reference loads
