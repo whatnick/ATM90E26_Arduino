@@ -11,6 +11,9 @@ The following pieces of equipment are recommended for accurate full range calibr
 - Small Inductive/Resistive Load for low end power factor calibration, preferably a compact fluorescent bulb.
 - Reference Multimeter/Wattmeter for independent measurement of Current, Voltage, Power and Power Factor.
 
+A sample jig can be seen [here](
+https://twitter.com/MaxClerkwell/status/1315005293328297989?s=20)
+
 ## Calibration procedure
 
 ### Calibrating voltage gain
