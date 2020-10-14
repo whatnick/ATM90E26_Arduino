@@ -46,4 +46,4 @@ If the voltage and current multipliers are set correctly in the above steps the 
 
 ### Calibrating power factor
 
-This requires use of the variable inductor or a well known inductive load. Use the motorized load (fan/fridge) to calibrate the higher set points of the power factor and change the `Lphi` and `Nphi` default values. The library currently does not implement runtime change to these values they are hardcoded in the header file. If the purely resistive load shows unity power factor not phase angle calibrations are necessary.
+This requires use of the variable inductor or a well known inductive load. Use the motorized load (fan/fridge) to calibrate the higher set points of the power factor and change the `Lphi` and `Nphi` default values. The library currently does not implement runtime change to these values they are hardcoded in the header file. If the purely resistive load shows unity power factor no phase angle calibrations are necessary.
