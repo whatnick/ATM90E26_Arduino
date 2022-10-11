@@ -17,6 +17,10 @@ SoftwareSerial ATMSerial(D4, D3, false, 256); //NodeMCU v1.0
 SoftwareSerial ATMSerial(11, 13); //RX, TX
 #endif 
 
+#if defined(STM32F1)//Bluepill board
+SoftwareSerial ATMSerial(10, 11); // RX, TX
+#endif
+
 #if defined(ARDUINO_ARCH_SAMD)
 #include "wiring_private.h" // pinPeripheral() function
 //Feather M0 

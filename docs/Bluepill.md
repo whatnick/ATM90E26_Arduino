@@ -7,13 +7,13 @@ There are STM32F103 based boards available at very affordable price-point, commo
 SPI pins are in the table below
 |Pin function| Pin Number|
 |------------|-----------|
-|MISO | |
-|MOSI | |
-|SCK | |
-|CS | |
+|MOSI | 11 |
+|MISO | 12 |
+|SCK | 13 |
+|CS | 7 |
 
 ## UART Mode
 |Pin function| Pin Number|
 |------------|-----------|
-|RX | |
-|TX | |
+|RX | 10 |
+|TX | 11 |
