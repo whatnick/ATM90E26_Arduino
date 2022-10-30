@@ -18,7 +18,8 @@ SoftwareSerial ATMSerial(11, 13); //RX, TX
 #endif 
 
 #if defined(STM32F1)//Bluepill board
-SoftwareSerial ATMSerial(10, 11); // RX, TX
+//SoftwareSerial ATMSerial(PA10, PA11); // RX, TX
+HardwareSerial ATMSerial(USART3); // PB11 (RX), PB10   (TX)
 #endif
 
 #if defined(ARDUINO_ARCH_SAMD)

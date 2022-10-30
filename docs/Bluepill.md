@@ -13,7 +13,15 @@ SPI pins are in the table below
 |CS | 7 |
 
 ## UART Mode
-|Pin function| Pin Number|
+**NOTE** - Pin functions are reversed on the ATM90E26 Side
+## Software Serial - TBD
+|Pin function (STM32)| Pin Number|
 |------------|-----------|
 |RX | 10 |
 |TX | 11 |
+
+### Hardware Serial - Tested Working
+|Pin function (STM32) | Pin Number |
+|------------|-----------|
+|RX | PB11 |
+|TX | PB10 |
