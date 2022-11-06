@@ -12,6 +12,8 @@ SPI pins are in the table below
 |SCK | PA5 |
 |CS | PA4 |
 
+![Bluepill SPI Wiring](bluepill_spi.png)
+
 ## UART Mode
 **NOTE** - Pin functions are reversed on the ATM90E26 Side
 ## Software Serial - TBD
