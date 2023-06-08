@@ -137,7 +137,7 @@ unsigned short ATM90E26_UART::GetSysStatus() {
   return CommEnergyIC(1, SysStatus, 0xFFFF);
 }
 
-uint16_t ATM90E26_UART::GetChecksum(const uint16_t *hex_values, int length)
+unsigned short ATM90E26_UART::GetChecksum(unsigned short *hex_values, int length)
 {
     uint16_t value = 0x0000;
     uint8_t lsb, msb;
@@ -170,17 +170,16 @@ void ATM90E26_UART::InitEnergyIC() {
   // Set metering calibration values
   CommEnergyIC(0, CalStart, 0x5678); // Metering calibration startup command.
                                      // Register 21 to 2B need to be set
-  CommEnergyIC(0, PLconstH, 0x00B9); // PL Constant MSB
-  CommEnergyIC(0, PLconstL, 0xC1F3); // PL Constant LSB
-  CommEnergyIC(0, Lgain, 0x1D39);    // Line calibration gain
-  CommEnergyIC(0, Lphi, 0x0000);     // Line calibration angle
-  CommEnergyIC(0, PStartTh, 0x08BD); // Active Startup Power Threshold
-  CommEnergyIC(0, PNolTh, 0x0000);   // Active No-Load Power Threshold
-  CommEnergyIC(0, QStartTh, 0x0AEC); // Reactive Startup Power Threshold
-  CommEnergyIC(0, QNolTh, 0x0000);   // Reactive No-Load Power Threshold
-  CommEnergyIC(0, MMode, 0x9422); // Metering Mode Configuration. All defaults.
-                                  // See pg 31 of datasheet.
-  CommEnergyIC(0, CSOne, 0x4A34); // Write CSOne, as self calculated
+  unsigned reg_adr[CfgRegLen1] = {PLconstH,PLconstL,Lgain,Lphi,Ngain,Nphi,PStartTh,PNolTh,QStartTh,QNolTh,MMode};
+  unsigned short reg_values[CfgRegLen1] = {0x00B9,0xC1F3,0x1D39,0x0000,0x0000,0x0000,0x08BD,0x0000,0x0AEC,0x0000,0x9422};
+
+  // This loop iterates though above configurations from 21H-2BH registers.
+  for (int i = 0; i < CfgRegLen1; i++) {
+    CommEnergyIC(0, reg_adr[i], reg_values[i]);
+  }
+
+  // See pg 31 of datasheet.
+  CommEnergyIC(0, CSOne, GetChecksum(reg_values, CfgRegLen1)); // Write CSOne, as self calculated
 
   Serial.print("Checksum 1:");
   Serial.println(
@@ -188,16 +187,17 @@ void ATM90E26_UART::InitEnergyIC() {
       HEX); // Checksum 1. Needs to be calculated based off the above values.
 
   // Set measurement calibration values
-  CommEnergyIC(
-      0, AdjStart,
-      0x5678); // Measurement calibration startup command, registers 31-3A
-  CommEnergyIC(0, Ugain, 0xD464);    // Voltage rms gain
-  CommEnergyIC(0, IgainL, 0x6E49);   // L line current gain
-  CommEnergyIC(0, Uoffset, 0x0000);  // Voltage offset
-  CommEnergyIC(0, IoffsetL, 0x0000); // L line current offset
-  CommEnergyIC(0, PoffsetL, 0x0000); // L line active power offset
-  CommEnergyIC(0, QoffsetL, 0x0000); // L line reactive power offset
-  CommEnergyIC(0, CSTwo, 0xD294);    // Write CSTwo, as self calculated
+  CommEnergyIC(0, AdjStart, 0x5678); // Measurement calibration startup command, registers 31-3A
+
+  unsigned reg_values2[CfgRegLen2] = {Ugain,IgainL,IgainN,Uoffset,IoffsetL,IoffsetN,PoffsetL,QoffsetL,PoffsetN,QoffsetN};
+  unsigned short reg_adr2[CfgRegLen2] = {0xD464,0x6E49,0x7530,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000};
+
+  // This loop iterates though above configurations from 31H-3AH registers.
+  for (int i = 0; i < CfgRegLen2; i++) {
+    CommEnergyIC(0, reg_values2[i], reg_adr2[i]);
+  }
+
+  CommEnergyIC(0, CSTwo, GetChecksum(reg_values2, CfgRegLen2));    // Write CSTwo, as self calculated
 
   Serial.print("Checksum 2:");
   Serial.println(
