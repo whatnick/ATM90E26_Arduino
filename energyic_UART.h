@@ -48,7 +48,7 @@
 #define QNolTh 0x2A    // Reactive No-Load Power Threshold
 #define MMode 0x2B     // Metering Mode Configuration
 #define CSOne 0x2C     // Checksum 1
-#define CfgRegLen1 11   // Length of register for Checksum 1
+#define CfgRegLen1 11  // Amount of register for Checksum 1
 #define AdjStart 0x30  // Measurement Calibration Start Command
 #define Ugain 0x31     // Voltage rms Gain
 #define IgainL 0x32    // L Line Current rms Gain
@@ -61,7 +61,7 @@
 #define PoffsetN 0x39  // N Line Active Power Offset
 #define QoffsetN 0x3A  // N Line Reactive Power Offset
 #define CSTwo 0x3B     // Checksum 2
-#define CfgRegLen2 10  // Length of register for Checksum 2
+#define CfgRegLen2 10  // Amount of register for Checksum 2
 #define APenergy 0x40  // Forward Active Energy
 #define ANenergy 0x41  // Reverse Active Energy
 #define ATenergy 0x42  // Absolute Active Energy

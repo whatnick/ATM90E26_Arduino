@@ -137,14 +137,12 @@ unsigned short ATM90E26_UART::GetSysStatus() {
   return CommEnergyIC(1, SysStatus, 0xFFFF);
 }
 
-unsigned short ATM90E26_UART::GetChecksum(unsigned short *hex_values, int length)
-{
-    uint16_t value = 0x0000;
-    uint8_t lsb, msb;
+unsigned short ATM90E26_UART::GetChecksum(unsigned short *hex_values, int length) {
+    unsigned short value = 0x0000;
+    unsigned char lsb, msb;
     int chk1 = 0, chk2 = 0;
 
-    for (int i = 0; i < length; i++)
-    {
+    for (int i = 0; i < length; i++) {
         msb = (hex_values[i] >> 8);
         lsb = (hex_values[i] & 0x00FF);
         chk1 += msb + lsb;
@@ -162,6 +160,13 @@ Initialise Energy IC, assume UART has already began in the main code
 void ATM90E26_UART::InitEnergyIC() {
   unsigned short systemstatus;
 
+  // Base Configuration for 21H-2BH
+  unsigned char reg_adr1[CfgRegLen1] = {PLconstH,PLconstL,Lgain,Lphi,Ngain,Nphi,PStartTh,PNolTh,QStartTh,QNolTh,MMode};
+  unsigned short reg_values1[CfgRegLen1] = {0x00B9,0xC1F3,0x1D39,0x0000,0x0000,0x0000,0x08BD,0x0000,0x0AEC,0x0000,0x9422};
+  //Base Configuration for 31H-3AH.
+  unsigned char reg_adr2[CfgRegLen2] = {Ugain,IgainL,IgainN,Uoffset,IoffsetL,IoffsetN,PoffsetL,QoffsetL,PoffsetN,QoffsetN};
+  unsigned short reg_values2[CfgRegLen2] = {0xD464,0x6E49,0x7530,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000};
+
   CommEnergyIC(0, SoftReset, 0x789A); // Perform soft reset
   CommEnergyIC(0, FuncEn, 0x0030);    // Voltage sag irq=1, report on warnout
                                    // pin=1, energy dir change irq=0
@@ -169,17 +174,11 @@ void ATM90E26_UART::InitEnergyIC() {
 
   // Set metering calibration values
   CommEnergyIC(0, CalStart, 0x5678); // Metering calibration startup command.
-                                     // Register 21 to 2B need to be set
-  unsigned reg_adr[CfgRegLen1] = {PLconstH,PLconstL,Lgain,Lphi,Ngain,Nphi,PStartTh,PNolTh,QStartTh,QNolTh,MMode};
-  unsigned short reg_values[CfgRegLen1] = {0x00B9,0xC1F3,0x1D39,0x0000,0x0000,0x0000,0x08BD,0x0000,0x0AEC,0x0000,0x9422};
-
   // This loop iterates though above configurations from 21H-2BH registers.
   for (int i = 0; i < CfgRegLen1; i++) {
-    CommEnergyIC(0, reg_adr[i], reg_values[i]);
-  }
-
-  // See pg 31 of datasheet.
-  CommEnergyIC(0, CSOne, GetChecksum(reg_values, CfgRegLen1)); // Write CSOne, as self calculated
+    CommEnergyIC(0, reg_adr1[i], reg_values1[i]);
+  } // See pg 31 of datasheet.
+  CommEnergyIC(0, CSOne, GetChecksum(reg_values1, CfgRegLen1)); // Write CSOne, as self calculated
 
   Serial.print("Checksum 1:");
   Serial.println(
@@ -188,15 +187,10 @@ void ATM90E26_UART::InitEnergyIC() {
 
   // Set measurement calibration values
   CommEnergyIC(0, AdjStart, 0x5678); // Measurement calibration startup command, registers 31-3A
-
-  unsigned reg_values2[CfgRegLen2] = {Ugain,IgainL,IgainN,Uoffset,IoffsetL,IoffsetN,PoffsetL,QoffsetL,PoffsetN,QoffsetN};
-  unsigned short reg_adr2[CfgRegLen2] = {0xD464,0x6E49,0x7530,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000};
-
   // This loop iterates though above configurations from 31H-3AH registers.
   for (int i = 0; i < CfgRegLen2; i++) {
-    CommEnergyIC(0, reg_values2[i], reg_adr2[i]);
+    CommEnergyIC(0, reg_adr2[i], reg_values2[i]);
   }
-
   CommEnergyIC(0, CSTwo, GetChecksum(reg_values2, CfgRegLen2));    // Write CSTwo, as self calculated
 
   Serial.print("Checksum 2:");
