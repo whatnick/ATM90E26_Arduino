@@ -137,6 +137,25 @@ unsigned short ATM90E26_UART::GetSysStatus() {
   return CommEnergyIC(1, SysStatus, 0xFFFF);
 }
 
+uint16_t ATM90E26_UART::GetChecksum(const uint16_t *hex_values, int length)
+{
+    uint16_t value = 0x0000;
+    uint8_t lsb, msb;
+    int chk1 = 0, chk2 = 0;
+
+    for (int i = 0; i < length; i++)
+    {
+        msb = (hex_values[i] >> 8);
+        lsb = (hex_values[i] & 0x00FF);
+        chk1 += msb + lsb;
+        chk2 ^= msb ^ lsb;
+    }
+    value = chk1 % 0x100;
+    value += (chk2 << 8);  
+
+    return value;
+}
+
 /*
 Initialise Energy IC, assume UART has already began in the main code
 */
